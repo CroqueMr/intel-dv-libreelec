@@ -32,6 +32,10 @@ accepted as a successful DV result merely because the TV shows a DV logo.
 
 ## Run the portable checks
 
+Run the test suite on Linux, including a Linux filesystem in WSL. The image-path
+tests require Linux symlink semantics; native Windows is not a supported test or
+build host. The checks do not require the target Intel PC or an attached TV.
+
 ```sh
 python3 verify.py
 python3 -m unittest discover -s tests -p 'test_*.py'
