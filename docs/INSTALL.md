@@ -6,8 +6,8 @@ Do not overwrite your only working installation without a backup.
 
 ## New installation
 
-1. Download this release's Generic x86_64 `.img.gz` and `SHA256SUMS`.
-2. Verify its SHA-256. Use LibreELEC's USB-SD Creator in **Select file** mode or
+1. Download this release's Generic x86_64 `.img.gz`.
+2. Use LibreELEC's USB-SD Creator in **Select file** mode or
    another trusted image writer. Writing an image erases the selected drive;
    check the model and capacity before confirming.
 3. Boot it on the intended Intel machine and use LibreELEC's normal setup wizard.

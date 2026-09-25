@@ -17,16 +17,15 @@ This does not add NVIDIA support to the Intel DV implementation.
 The bundle does not contain a Dolby SDK, personal
 configuration, media or the build host's compiled toolchain.
 
-## Download, reassemble and verify
+## Download and reassemble
 
 For installation or updating, download the image or update archive instead;
 this bundle is only needed for source review, rebuilding and redistribution.
 
 Download both `intel-dv-libreelec-0.1.0-rc1-complete-sources.tar.part-*` files
-and `SHA256SUMS` from the same release. In an empty directory:
+from the same release. In an empty directory:
 
 ```sh
-sha256sum --check --ignore-missing SHA256SUMS
 cat intel-dv-libreelec-0.1.0-rc1-complete-sources.tar.part-* > complete-sources.tar
 tar -xf complete-sources.tar
 cd corresponding-sources
@@ -34,9 +33,7 @@ sha256sum --check BUNDLE-SHA256SUMS
 sha256sum --check release-information/SHA256SUMS
 ```
 
-The release-wide checksum file also lists the installation image and update
-archive. `--ignore-missing` permits downloading just the source bundle, but
-**both numbered source parts are required**. Never combine parts from the old
+**Both numbered source parts are required**. Never combine parts from the old
 three-part layout with these files.
 
 The original build receipt and collected third-party notices are now grouped

@@ -16,9 +16,8 @@ and HDMI-route checks. Read the profile matrix before installing.
 | `LibreELEC-Generic.x86_64-13.0-intel-dv-0.1.0-rc1.img.gz` | Write to a spare installation medium. |
 | Matching `.tar` | Standard LibreELEC manual update archive. |
 | `intel-dv-libreelec-0.1.0-rc1-complete-sources.tar.part-01` and `part-02` | Complete matching build sources, patches, notices and build receipt. Both parts are required; see [source bundle instructions](docs/SOURCE-BUNDLE.md). |
-| `SHA256SUMS` | Verify the downloaded files. |
 
-For installation, only the `.img.gz` and its checksum are needed. For updates,
+For installation, only the `.img.gz` is needed. For updates,
 use the `.tar` instead. GitHub's two automatic source downloads contain this
 repository only, not the complete matching LibreELEC build sources.
 

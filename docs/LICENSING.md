@@ -46,8 +46,8 @@ tests. An image contains many more components; its matching source delivery
 must therefore also include the pinned LibreELEC source tree, the exact source
 archives used, relevant build scripts/configuration and package notices.
 
-Release images and corresponding source assets together, with cryptographic
-checksums and a build receipt. Keep them available together for recipients.
+Release images and corresponding source assets together, with the build receipt
+and notices included in the source bundle. Keep them available for recipients.
 Do not call a patch-only ZIP the complete corresponding source of an entire
 LibreELEC image. Check firmware redistribution terms separately from GPL source
 obligations. Do not include DRM addons or media in a clean image.

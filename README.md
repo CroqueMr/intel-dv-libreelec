@@ -76,7 +76,7 @@ displays are outside the supported DV route. See [hardware requirements](docs/HA
 
 **[Download the installation image](https://github.com/CroqueMr/intel-dv-libreelec/releases/download/v0.1.0-rc1/LibreELEC-Generic.x86_64-13.0-intel-dv-0.1.0-rc1.img.gz)**
 or **[download the manual update](https://github.com/CroqueMr/intel-dv-libreelec/releases/download/v0.1.0-rc1/LibreELEC-Generic.x86_64-13.0-intel-dv-0.1.0-rc1.tar)**.
-Only one is needed. Verify it with [SHA256SUMS](https://github.com/CroqueMr/intel-dv-libreelec/releases/download/v0.1.0-rc1/SHA256SUMS).
+Only one is needed.
 The larger [complete source bundle](docs/SOURCE-BUNDLE.md) is for developers and
 redistribution, not installation.
 
@@ -86,5 +86,5 @@ redistribution, not installation.
 - [Licenses and source attribution](docs/LICENSING.md).
 
 Images belong in **GitHub Releases**, not in Git history. A binary release must
-be accompanied by its checksums and matching source bundle; never substitute an
+be accompanied by its matching source bundle; never substitute an
 older image just because its filename looks similar.

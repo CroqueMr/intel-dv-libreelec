@@ -46,8 +46,9 @@ additional patches with zero fuzz. It is not a compiler or HDMI test.
 
 ## Distribution
 
-Keep images out of Git. Attach the image, update archive, checksums, source ZIP,
-matching upstream source bundle and build receipt to the same release. The
+Keep images out of Git. Attach the image, update archive and matching upstream
+source bundle to the same release. Group the build receipt and notices inside
+the source bundle rather than publishing separate download assets. The
 source bundle must include build scripts, the pinned upstream tree, the source
 archives and patches actually used, plus notices. Merely linking to an upstream
 website is not our binary-release source-delivery plan.
