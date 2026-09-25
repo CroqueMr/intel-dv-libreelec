@@ -4,6 +4,7 @@ import argparse
 import gzip
 import json
 from pathlib import Path
+import re
 import shutil
 import socket
 import subprocess
@@ -24,7 +25,7 @@ def boot(image, kernel, output, graphical=False):
                '-display', 'none', '-vga', 'virtio' if graphical else 'std', '-nic', 'none', '-monitor', 'none',
                '-qmp', 'unix:' + str(qmp) + ',server=on,wait=off',
                '-serial', 'file:' + str(serial), '-no-reboot', '-kernel', str(kernel),
-               '-append', 'boot=/dev/vda1 disk=/dev/vda2 console=tty0 '
+               '-append', 'boot=/dev/vda1 disk=/dev/vda2 console=tty0 console=ttyS0,115200n8 '
                           'systemd.log_target=console' +
                           ('' if graphical else ' systemd.unit=multi-user.target'),
                '-drive', 'file=' + str(overlay) + ',format=qcow2,if=virtio']
@@ -66,11 +67,13 @@ def boot(image, kernel, output, graphical=False):
     report = {'image': image.name, 'kernel': kernel.name, 'timeout': timed_out,
               'qemu_return_code': return_code,
               'serial_systemd_seen': 'systemd[' in text,
-              'serial_multi_user_seen': 'Reached target Multi-User System' in text,
+              'serial_multi_user_seen': bool(re.search(r'Reached target (?:Multi-User System|multi-user\.target)', text)),
               'framebuffer_capture': (output / 'screen.png').is_file(),
               'serial_kernel_panic_seen': 'Kernel panic' in text,
               'framebuffer_review_required': True,
               'graphical_boot_requested': graphical,
+              'observation_window_seconds': 60,
+              'network_intentionally_disabled': True,
               'scope': ('Disposable virtual-GPU boot; framebuffer review required; no Intel decoder or HDMI validation'
                         if graphical else 'Disposable VM boot only; no Kodi, Intel decoder or HDMI validation')}
     (output / 'report.json').write_text(json.dumps(report, indent=2) + '\n')
