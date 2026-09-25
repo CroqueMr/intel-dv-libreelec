@@ -18,9 +18,10 @@ Do not overwrite your only working installation without a backup.
    source and active DV transport; the display's own DV indicator is a separate
    confirmation.
 
-An image does not contain SSH credentials, enabled remote-control credentials,
-personal addons, sources or movies. Configure access yourself using upstream
-LibreELEC settings. Do not expose Kodi JSON-RPC or SSH to the public internet.
+This image does not include personal accounts, SSH keys, saved remote-control
+credentials, personal addons, media sources or movies. Configure access and
+choose your own password using upstream LibreELEC settings. Do not expose Kodi
+JSON-RPC or SSH to the public internet.
 
 ## Update an existing test installation
 
