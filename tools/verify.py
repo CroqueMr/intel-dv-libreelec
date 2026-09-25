@@ -1,11 +1,13 @@
 # SPDX-License-Identifier: MIT
-"""Fail closed on source inventory, patch mapping, license text or private-data drift."""
+"""Check build inputs, licenses and accidental private data without freezing docs."""
 import hashlib
 import json
 from pathlib import Path
 import re
+import subprocess
+import sys
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[1]
 
 def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -17,9 +19,19 @@ def checked(root, name):
     return path
 
 def source_files(root):
-    return {p.relative_to(root).as_posix(): p for p in root.rglob('*')
-            if p.is_file() and '.git' not in p.parts and '__pycache__' not in p.parts
-            and p.suffix != '.pyc' and p.name != 'SOURCE-FILES.sha256'}
+    """Respect Git's ignore rules, with a source-archive fallback (no Git needed)."""
+    if (root / '.git').exists():
+        result = subprocess.run(
+            ['git', '-C', str(root), 'ls-files', '-z', '--cached', '--others', '--exclude-standard'],
+            capture_output=True, check=True)
+        names = set(result.stdout.decode('utf-8').split('\0')) - {''}
+        return {name: checked(root, name) for name in names
+                if (root / name).exists() or (root / name).is_symlink()}
+    ignored = {'.git', '__pycache__', 'host-tests', 'build-output', '.venv', 'venv'}
+    return {p.relative_to(root).as_posix(): checked(root, p.relative_to(root).as_posix())
+            for p in root.rglob('*') if (p.is_file() or p.is_symlink())
+            and not ignored.intersection(p.relative_to(root).parts)
+            and p.suffix != '.pyc'}
 
 def new_file(patch, name):
     match = re.search(r'--- /dev/null\n\+\+\+ b/' + re.escape(name) + r'\n@@ -0,0 \+1,(\d+) @@\n', patch)
@@ -32,23 +44,15 @@ def new_file(patch, name):
 
 def verify(root):
     files = source_files(root)
-    inventory = {}
-    for line in (root / 'SOURCE-FILES.sha256').read_text().splitlines():
-        digest, name = line.split('  ', 1)
-        if name in inventory or not re.fullmatch('[0-9a-f]{64}', digest):
-            raise ValueError('Malformed inventory')
-        inventory[name] = digest
-        if sha(checked(root, name)) != digest:
-            raise ValueError('Checksum mismatch: ' + name)
-    if files.keys() != inventory.keys():
-        raise ValueError('Uninventoried or missing source files')
+    # Git already versions the repository. Only build inputs and canonical
+    # license/provenance records need byte-exact validation, not prose or CI files.
     canonical = json.loads((root / 'LICENSES/canonical-checksums.json').read_text())
     for name, digest in canonical['files'].items():
         if sha(checked(root / 'LICENSES', name)) != digest:
             raise ValueError('Canonical license mismatch: ' + name)
     if 'Version 3, 29 June 2007' not in (root / 'LICENSES/GPL-3.0.txt').read_text():
         raise ValueError('Incorrect GPLv3 license text')
-    manifest = json.loads((root / 'dvbridge-overlay.json').read_text())
+    manifest = json.loads((root / 'config/dvbridge-overlay.json').read_text())
     if manifest['files'].keys() != manifest['source_map'].keys():
         raise ValueError('Overlay mapping mismatch')
     for destination, digest in manifest['files'].items():
@@ -59,7 +63,7 @@ def verify(root):
     patches = {p.relative_to(root).as_posix() for p in (root / 'patches').rglob('*.patch')}
     if patches != {p for p in manifest['source_map'].values() if p.endswith('.patch')}:
         raise ValueError('Unmapped patch')
-    descriptions = json.loads((root / 'patch-index.json').read_text())
+    descriptions = json.loads((root / 'config/patch-index.json').read_text())
     if descriptions.keys() != patches:
         raise ValueError('Missing patch description')
     kodi = (root / 'patches/kodi/kodi-9990-native-dv.patch').read_text()
@@ -67,7 +71,7 @@ def verify(root):
     for name, digest in receipt['files'].items():
         if hashlib.sha256(new_file(kodi, 'tools/dvbridge/' + name)).hexdigest() != digest:
             raise ValueError('Inherited helper receipt mismatch')
-    # Scan every file, including this checker. Generic patterns avoid embedding
+    # Scan source text, including this checker. Generic patterns avoid embedding
     # the maintainer's private identifiers in the published security check.
     patterns = [r'(?i)-----BEGIN (?:OPENSSH |RSA |EC )?PRIVATE KEY-----',
                 r'(?i)\b(?:ghp|github_pat)_[a-z0-9_]{20,}',
@@ -75,7 +79,12 @@ def verify(root):
                 r'(?i)(?:/home/|[a-z]:[\\/]+Users[\\/]+)[a-z0-9_.-]+[\\/]',
                 r'\b192\.168\.\d{1,3}\.\d{1,3}\b']
     for name, path in files.items():
-        text = path.read_text(encoding='utf-8')
+        try:
+            text = path.read_text(encoding='utf-8')
+        except UnicodeDecodeError:
+            # An illustration or other binary is not a malformed source tree.
+            # This text scanner is not a binary-release or malware audit.
+            continue
         for pattern in patterns:
             if re.search(pattern, text):
                 raise ValueError('Private-data pattern found in ' + name)
@@ -86,4 +95,8 @@ def verify(root):
             'checks': 'passed', 'hardware_test': False}
 
 if __name__ == '__main__':
-    print(json.dumps(verify(ROOT), indent=2))
+    try:
+        print(json.dumps(verify(ROOT), indent=2))
+    except (ValueError, OSError, subprocess.CalledProcessError) as error:
+        print(f'Source check failed: {error}', file=sys.stderr)
+        sys.exit(1)

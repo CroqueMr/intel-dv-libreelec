@@ -16,9 +16,10 @@ Build all patched components together: the FFmpeg metadata extension is an ABI c
 | LibreELEC Settings | Pinned source | `9cf5f9868c48878a31ee9f97d290af889dd1c879` | No |
 
 The checksummed upstream archives for the four patched components are listed
-in `check-patches.py`. LibreELEC pins the rest of the distribution, including
+in `tools/check-patches.py`. LibreELEC pins the rest of the distribution, including
 its compiler, graphics stack, bootloader, firmware and settings addon.
 
-The recipe/patch installation map is `dvbridge-overlay.json`; the complete
-source-repository byte inventory is `SOURCE-FILES.sha256`. A binary release
-also carries its own image receipt and corresponding-source archive inventory.
+The recipe/patch installation map is `config/dvbridge-overlay.json`; machine-readable
+versions and patch descriptions are in `config/versions.json` and
+`config/patch-index.json`. Git tracks normal repository edits. A binary release
+separately carries its image receipt and corresponding-source archive inventory.

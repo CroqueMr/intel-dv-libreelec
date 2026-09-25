@@ -37,14 +37,16 @@ tests require Linux symlink semantics; native Windows is not a supported test or
 build host. The checks do not require the target Intel PC or an attached TV.
 
 ```sh
-python3 verify.py
+python3 tools/verify.py
 python3 -m unittest discover -s tests -p 'test_*.py'
 ```
 
 Use Python 3.12 or later for archive extraction. The source checker verifies
-all file hashes, patch mappings, descriptions, canonical license texts,
+build-input hashes, patch mappings, descriptions, canonical license texts,
 inherited-header receipts and generic private-data patterns. It is a useful
-gate, not a substitute for code review.
+gate, not a substitute for code review. Editing documentation or adding a normal
+source file does not require regenerating a repository-wide checksum inventory.
+Ignored local build outputs are not scanned in a Git checkout.
 
 For C/C++ tests, install CMake, Ninja, compilers, pkg-config, Mesa EGL/GLES/GBM
 development files, libdrm development files and llvmpipe. Build native-host
@@ -52,9 +54,9 @@ dependencies from the same source cache with Meson, Make, LCMS2 development
 files and glad/Jinja2 available:
 
 ```sh
-python3 build-host-test-deps.py --source-cache /path/to/LibreELEC-DV/sources \
+python3 tools/build-host-test-deps.py --source-cache /path/to/LibreELEC-DV/sources \
   --output /path/to/new-host-dependencies --jobs 4
-python3 check-patches.py --source-cache /path/to/LibreELEC-DV/sources \
+python3 tools/check-patches.py --source-cache /path/to/LibreELEC-DV/sources \
   --output /path/to/new-source-check
 export HOST_PREFIX=/path/to/new-host-dependencies/prefix
 export KODI_SOURCE=/path/to/new-source-check/kodi/xbmc-b7afba240133a570145466cfaf6a6825f84c6ad1
@@ -78,14 +80,14 @@ support and is not enabled for the default software-only suite.
 ## Image checks
 
 ```sh
-python3 audit-image.py --tree /path/to/LibreELEC-DV \
+python3 tools/audit-image.py --tree /path/to/LibreELEC-DV \
   --image /path/to/LibreELEC-DV/target/selected-image.img.gz \
   --output image-audit.json
 ```
 
 This checks the built image's dependencies, runtime search paths, DV build
 configuration, native settings, source manifest and compressed-image checksum.
-Dynamic drivers/plugins still need runtime checks. The optional `boot-smoke.py`
+Dynamic drivers/plugins still need runtime checks. The optional `tools/boot-smoke.py`
 boots a disposable copy in QEMU, without network or physical disks; its virtual
 GPU cannot validate Intel decoding or DV reception.
 

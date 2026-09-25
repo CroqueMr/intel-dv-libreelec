@@ -3,11 +3,13 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 
-spec = importlib.util.spec_from_file_location('overlay', Path(__file__).parents[1] / 'apply-overlay.py')
+spec = importlib.util.spec_from_file_location('overlay', Path(__file__).parents[1] / 'tools/apply-overlay.py')
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 
@@ -27,6 +29,7 @@ class OverlayTests(unittest.TestCase):
         self.git('commit', '-qm', 'fixture baseline')
         self.bundle = self.base / 'bundle'
         (self.bundle / 'overlay').mkdir(parents=True)
+        (self.bundle / 'config').mkdir()
         (self.bundle / 'overlay/recipe').write_text('updated\n')
         self.manifest = {'libreelec': self.git('rev-parse', 'HEAD').strip(), 'files': {
             'recipe': hashlib.sha256(b'updated\n').hexdigest()}}
@@ -36,7 +39,7 @@ class OverlayTests(unittest.TestCase):
         return subprocess.check_output(['git', '-C', str(self.tree), *args], text=True)
 
     def save(self):
-        (self.bundle / 'dvbridge-overlay.json').write_text(json.dumps(self.manifest))
+        (self.bundle / 'config/dvbridge-overlay.json').write_text(json.dumps(self.manifest))
 
     def unchanged(self):
         self.assertEqual((self.tree / 'recipe').read_text(), 'original\n')
@@ -54,6 +57,17 @@ class OverlayTests(unittest.TestCase):
             module.apply(self.bundle, self.tree)
         self.unchanged()
         self.assertEqual((self.tree / 'user-note').read_text(), 'keep\n')
+
+    def test_command_line_uses_repository_config_from_other_directory(self):
+        tools = self.bundle / 'tools'
+        tools.mkdir()
+        script = tools / 'apply-overlay.py'
+        shutil.copyfile(Path(module.__file__), script)
+        subprocess.run([sys.executable, str(script), str(self.tree)], cwd=self.base,
+                       check=True, capture_output=True)
+        self.assertEqual((self.tree / 'recipe').read_text(), 'updated\n')
+        self.assertEqual(json.loads((self.tree / 'dvbridge-overlay.json').read_text()),
+                         self.manifest)
 
     def test_all_hashes_before_first_write(self):
         (self.bundle / 'overlay/bad').write_text('bad\n')

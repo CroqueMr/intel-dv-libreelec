@@ -16,7 +16,7 @@ notices remain in the resulting source files.
 | Other image packages and firmware | Their own upstream terms, recorded by the pinned LibreELEC recipes and retained in the matching source distribution. |
 
 Full primary license texts and retained third-party notices are under
-`LICENSES/`. Their canonical hashes are checked by `verify.py`. The existing
+`LICENSES/`. Their canonical hashes are checked by `tools/verify.py`. The existing
 Kodi functional patch already includes its combined-build notice and GPLv3
 text; no additional licensing-only patch is added by this release preparation.
 

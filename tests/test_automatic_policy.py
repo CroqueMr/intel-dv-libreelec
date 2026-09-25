@@ -8,7 +8,7 @@ LAB = Path(__file__).resolve().parents[1]
 
 class AutomaticPolicy(unittest.TestCase):
     def test_no_custom_settings_sources(self):
-        manifest = json.loads((LAB / 'dvbridge-overlay.json').read_text())
+        manifest = json.loads((LAB / 'config/dvbridge-overlay.json').read_text())
         self.assertEqual(manifest['settings'], 'upstream_unmodified')
         self.assertFalse(manifest['runtime_opt_in_required'])
         self.assertFalse(any('LibreELEC-settings' in path or path.endswith('kodi.service')

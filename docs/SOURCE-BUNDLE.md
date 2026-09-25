@@ -51,8 +51,11 @@ Use a Linux filesystem and install the normal LibreELEC host prerequisites:
 ```sh
 git clone LibreELEC-upstream.git LibreELEC-DV
 git -C LibreELEC-DV remote set-url origin https://github.com/LibreELEC/LibreELEC.tv.git
-python3 intel-dv-libreelec/verify.py
-python3 intel-dv-libreelec/apply-overlay.py LibreELEC-DV
+tool_dir=intel-dv-libreelec/tools
+# The original 0.1.0-rc1 source snapshot kept its tools at the repository root.
+[ -d "$tool_dir" ] || tool_dir=intel-dv-libreelec
+python3 "$tool_dir/verify.py"
+python3 "$tool_dir/apply-overlay.py" LibreELEC-DV
 cp -a sources LibreELEC-DV/sources
 cd LibreELEC-DV
 PROJECT=Generic ARCH=x86_64 OFFICIAL=no \
@@ -69,7 +72,7 @@ bundle and notices when redistributing the accompanying binary image.
 After a successful image build, from the Intel DV repository:
 
 ```sh
-python3 export-sources.py --tree /path/to/LibreELEC-DV \
+python3 tools/export-sources.py --tree /path/to/LibreELEC-DV \
   --output /path/to/new-output/corresponding-sources
 ```
 

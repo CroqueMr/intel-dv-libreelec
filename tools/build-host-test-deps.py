@@ -15,7 +15,7 @@ SOURCES = {
 
 
 def build(bundle, cache, output, jobs):
-    manifest = json.loads((bundle / 'dvbridge-overlay.json').read_text())
+    manifest = json.loads((bundle / 'config/dvbridge-overlay.json').read_text())
     for name, digest in manifest['files'].items():
         if hashlib.sha256((bundle / manifest['source_map'][name]).read_bytes()).hexdigest() != digest:
             raise ValueError('Overlay hash mismatch: ' + name)
@@ -62,7 +62,7 @@ def build(bundle, cache, output, jobs):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--bundle', type=Path, default=Path(__file__).resolve().parent)
+    parser.add_argument('--bundle', type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument('--source-cache', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--jobs', type=int, default=2)

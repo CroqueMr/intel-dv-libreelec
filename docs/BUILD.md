@@ -10,10 +10,10 @@ This overlay targets **Generic**, not Generic-legacy/X11, ARM or CoreELEC.
 After obtaining this repository as `intel-dv-libreelec`:
 
 ```sh
-python3 intel-dv-libreelec/verify.py
+python3 intel-dv-libreelec/tools/verify.py
 git clone https://github.com/LibreELEC/LibreELEC.tv.git LibreELEC-DV
 git -C LibreELEC-DV checkout --detach 3de4708704041ead8ae1531092efb7ea5da9d355
-python3 intel-dv-libreelec/apply-overlay.py LibreELEC-DV
+python3 intel-dv-libreelec/tools/apply-overlay.py LibreELEC-DV
 cd LibreELEC-DV
 PROJECT=Generic ARCH=x86_64 OFFICIAL=no \
   BUILDER_NAME=Intel-DV CUSTOM_VERSION=13.0-intel-dv-0.1.0-rc1 \
@@ -37,7 +37,7 @@ updates. The build also emits license texts and checksums. Never put a personal
 ## Verify source patches without a full build
 
 ```sh
-python3 intel-dv-libreelec/check-patches.py \
+python3 intel-dv-libreelec/tools/check-patches.py \
   --source-cache LibreELEC-DV/sources --output /path/to/new-check-directory
 ```
 

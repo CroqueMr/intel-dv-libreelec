@@ -9,7 +9,7 @@ import shutil
 import subprocess
 from urllib.parse import urlsplit
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def sha(path):
@@ -22,7 +22,7 @@ def run(*command):
 
 
 def export(tree, output):
-    manifest = json.loads((ROOT / 'dvbridge-overlay.json').read_text())
+    manifest = json.loads((ROOT / 'config/dvbridge-overlay.json').read_text())
     if run('git', '-C', str(tree), 'rev-parse', 'HEAD') != manifest['libreelec']:
         raise ValueError('Build tree does not use the pinned LibreELEC revision')
     for destination, digest in manifest['files'].items():

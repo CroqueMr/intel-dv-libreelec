@@ -88,3 +88,13 @@ redistribution, not installation.
 Images belong in **GitHub Releases**, not in Git history. A binary release must
 be accompanied by its matching source bundle; never substitute an
 older image just because its filename looks similar.
+
+## Repository layout
+
+- `patches/` — changes to Linux, FFmpeg, libplacebo and Kodi.
+- `overlay/` — LibreELEC package recipes.
+- `tools/` — scripts to apply, build-check and export the sources.
+- `config/` — pinned versions and patch/overlay manifests.
+- `tests/` — software regression tests, not installed in the image.
+- `docs/` — build guides, hardware notes and [release notes](docs/releases/v0.1.0-rc1.md).
+- `LICENSES/` — license texts and third-party notices.

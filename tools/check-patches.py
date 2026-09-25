@@ -53,4 +53,4 @@ if __name__ == '__main__':
     parser.add_argument('--source-cache', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
-    check(Path(__file__).resolve().parent, args.source_cache.resolve(), args.output.resolve())
+    check(Path(__file__).resolve().parents[1], args.source_cache.resolve(), args.output.resolve())

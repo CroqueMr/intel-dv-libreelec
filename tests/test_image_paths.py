@@ -4,7 +4,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-spec = importlib.util.spec_from_file_location('image_audit', Path(__file__).parents[1] / 'audit-image.py')
+spec = importlib.util.spec_from_file_location('image_audit', Path(__file__).parents[1] / 'tools/audit-image.py')
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 

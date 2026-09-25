@@ -9,7 +9,8 @@ import subprocess
 
 
 def apply(bundle, tree):
-    manifest = json.loads((bundle / 'dvbridge-overlay.json').read_text())
+    manifest_path = bundle / 'config/dvbridge-overlay.json'
+    manifest = json.loads(manifest_path.read_text())
     tree = tree.resolve(strict=True)
     git = ['git', '-C', str(tree)]
     if subprocess.check_output(git + ['rev-parse', 'HEAD'], text=True).strip() != manifest['libreelec']:
@@ -28,7 +29,7 @@ def apply(bundle, tree):
     for source, destination in validated:
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source, destination)
-    shutil.copyfile(bundle / 'dvbridge-overlay.json', tree / 'dvbridge-overlay.json')
+    shutil.copyfile(manifest_path, tree / 'dvbridge-overlay.json')
     print(f'Applied {len(validated)} checked files. No build or installation was started.')
 
 
@@ -36,4 +37,4 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('checkout', type=Path)
     args = parser.parse_args()
-    apply(Path(__file__).resolve().parent, args.checkout)
+    apply(Path(__file__).resolve().parents[1], args.checkout)
