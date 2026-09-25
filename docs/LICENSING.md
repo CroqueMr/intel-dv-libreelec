@@ -24,6 +24,21 @@ See [ORIGIN.md](ORIGIN.md) for source credits and derivation. Inherited notices
 must not be removed when copying, splitting or renaming the patches. A name
 change does not change the license of inherited code.
 
+## Development tools and acknowledgements
+
+The project also acknowledges the following tools and references used during
+development. These credits do not imply endorsement or replace the applicable
+source licenses and attribution notices.
+
+| Tool or reference | Contribution and licensing context |
+| --- | --- |
+| [dovi_tool](https://github.com/quietvoid/dovi_tool), by quietvoid and contributors | Public Dolby Vision metadata reference, including the CM4 grammar at revision `d4ad4ba7`. MIT attribution is retained; see [ORIGIN.md](ORIGIN.md). This is an open-source project, not a proprietary Dolby SDK. |
+| PGenerator-Plus / ofxRPI4Window, by Riccardo Biasiotto and contributors | Public transport reference inherited through the original implementation. Relevant GPL-3.0-or-later notices are retained; source revisions and derivation are documented in [ORIGIN.md](ORIGIN.md). |
+| ChatGPT 6 Astra (OpenAI) | AI assistance with implementation, debugging, code review, test preparation and documentation. Used as a development tool, not a playback component: no OpenAI model or service dependency is included in the release. |
+
+AI assistance does not replace third-party attribution, change upstream license
+obligations or constitute an independent certification of the implementation.
+
 ## Source and binary releases
 
 The source ZIP contains our patch set, exact recipes, build instructions and
