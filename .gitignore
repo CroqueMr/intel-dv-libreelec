@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+host-tests/
+build-output/
+*.img
+*.img.gz
+*.system
+*.kernel
+*.tar
+*.zip
+*.mkv
+*.mp4
+*.hevc
+*.log
