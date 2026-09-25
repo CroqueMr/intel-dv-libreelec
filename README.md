@@ -74,6 +74,12 @@ displays are outside the supported DV route. See [hardware requirements](docs/HA
 
 ## Get started
 
+**[Download the installation image](https://github.com/CroqueMr/intel-dv-libreelec/releases/download/v0.1.0-rc1/LibreELEC-Generic.x86_64-13.0-intel-dv-0.1.0-rc1.img.gz)**
+or **[download the manual update](https://github.com/CroqueMr/intel-dv-libreelec/releases/download/v0.1.0-rc1/LibreELEC-Generic.x86_64-13.0-intel-dv-0.1.0-rc1.tar)**.
+Only one is needed. Verify it with [SHA256SUMS](https://github.com/CroqueMr/intel-dv-libreelec/releases/download/v0.1.0-rc1/SHA256SUMS).
+The larger [complete source bundle](docs/SOURCE-BUNDLE.md) is for developers and
+redistribution, not installation.
+
 - [Install, update and recover](docs/INSTALL.md): use a spare device first.
 - [Build from the pinned sources](docs/BUILD.md): the repository contains the patches and recipes.
 - [Run the checks](docs/VALIDATION.md): software tests do not require a television.

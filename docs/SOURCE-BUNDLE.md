@@ -17,22 +17,35 @@ This does not add NVIDIA support to the Intel DV implementation.
 The bundle does not contain a Dolby SDK, personal
 configuration, media or the build host's compiled toolchain.
 
-## Reassemble and verify
+## Download, reassemble and verify
 
-Download all `corresponding-sources.tar.part-*` files, `SHA256SUMS` and
-`corresponding-sources.tar.sha256` from the same release. In an empty directory:
+For installation or updating, download the image or update archive instead;
+this bundle is only needed for source review, rebuilding and redistribution.
+
+Download both `intel-dv-libreelec-0.1.0-rc1-complete-sources.tar.part-*` files
+and `SHA256SUMS` from the same release. In an empty directory:
 
 ```sh
-sha256sum --check SHA256SUMS
-cat corresponding-sources.tar.part-* > corresponding-sources.tar
-sha256sum --check corresponding-sources.tar.sha256
-tar -xf corresponding-sources.tar
+sha256sum --check --ignore-missing SHA256SUMS
+cat intel-dv-libreelec-0.1.0-rc1-complete-sources.tar.part-* > complete-sources.tar
+tar -xf complete-sources.tar
 cd corresponding-sources
 sha256sum --check BUNDLE-SHA256SUMS
+sha256sum --check release-information/SHA256SUMS
 ```
 
-The release-wide checksum file also lists the image and other assets. Download
-them too, or verify only the lines corresponding to the files you downloaded.
+The release-wide checksum file also lists the installation image and update
+archive. `--ignore-missing` permits downloading just the source bundle, but
+**both numbered source parts are required**. Never combine parts from the old
+three-part layout with these files.
+
+The original build receipt and collected third-party notices are now grouped
+under `corresponding-sources/release-information/`. The release was simplified
+in place: its tag, installation image, update archive and all 1,215 original
+source-bundle entries are unchanged. Only the packaging and documentation differ.
+The unchanged source snapshot inside the bundle retains its original download
+instructions; this page and `release-information/README.md` describe the current
+asset layout.
 
 ## Reconstruct the source tree
 
