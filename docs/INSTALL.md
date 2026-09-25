@@ -1,8 +1,7 @@
 # Install, update and recover
 
-This is an independent experimental community image based on development
-LibreELEC/Kodi versions. Start on a spare drive and keep a known-good boot medium.
-Do not overwrite your only working installation without a backup.
+This is an independent experimental build image based on development
+LibreELEC/Kodi versions. 
 
 ## New installation
 
@@ -18,29 +17,5 @@ Do not overwrite your only working installation without a backup.
    source and active DV transport; the display's own DV indicator is a separate
    confirmation.
 
-This image does not include personal accounts, SSH keys, saved remote-control
-credentials, personal addons, media sources or movies. Configure access and
-choose your own password using upstream LibreELEC settings. Do not expose Kodi
-JSON-RPC or SSH to the public internet.
-
-## Update an existing test installation
-
-Use the matching `.tar` with LibreELEC's normal manual update procedure, after
-backing up settings. Do not mix a KERNEL from one build with SYSTEM from another.
-An upstream auto-update can replace this custom stack; choose update behavior
-deliberately in LibreELEC's existing settings. This project adds no update service.
-
-## Recovery
-
-Keep the previous complete update archive and your LibreELEC backup separately.
-If the device still boots, restore a known-good matching KERNEL/SYSTEM using the
-standard updater. If it does not, boot your recovery/install medium and restore
-the previous installation. Major Kodi-version downgrades may require restoring
-the matching userdata backup; an OS rollback is not a database downgrade tool.
-
-For diagnosis, the existing Intel kernel parameter can disable experimental
-transport (`i915.enable_dv_lab=0` or `xe.enable_dv_lab=0`, according to the active
-driver). This is a recovery control, not a custom UI requirement. Keep all
-unrelated boot arguments unchanged.
 
 Official reference: [LibreELEC manual updates](https://wiki.libreelec.tv/support/update).
