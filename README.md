@@ -3,8 +3,7 @@
 Native Dolby Vision playback in Kodi on compatible Intel HDMI systems.
 
 An independent **LibreELEC Generic x86_64 community build**, using Kodi's own
-VideoPlayer, VAAPI decoder and GBM/GLES display path. No external player, custom
-skin, activation menu or proprietary Dolby SDK is required.
+VideoPlayer, VAAPI decoder and GBM/GLES display path. **No external player, or proprietary Dolby SDK is required.**
 
 **Release candidate: 0.1.0-rc1.** Built on LibreELEC 13 development sources and
 Kodi 22 Beta 2, not on a stable LibreELEC release. Not affiliated with or
@@ -66,7 +65,7 @@ allowlist. A suitable native HDMI route and Standard-DV display are also needed.
 | Meteor Lake / Arrow Lake | Core Ultra 100 / 200 H, U or S where the display stack qualifies | Candidate families, not a blanket compatibility claim. |
 | Lunar Lake | Core Ultra 200V, including 226V | Shared driver/transport previously tested on 226V with mpv; **this LE/Kodi image still needs device-specific qualification**. |
 
-**Performance must be assessed on every reference**, including resolution,
+**Performance must be analyzed on every setup**, including resolution,
 frame rate, FEL workload, subtitles and cooling. Eligibility is not a promise
 of real-time 4K playback. Intel F/KF CPUs without an iGPU, older unsupported
 display engines, non-Intel GPUs, active DP-to-HDMI/LSPCON paths and LLDV-only
@@ -85,9 +84,6 @@ redistribution, not installation.
 - [Run the checks](docs/VALIDATION.md): software tests do not require a television.
 - [Licenses and source attribution](docs/LICENSING.md).
 
-Images belong in **GitHub Releases**, not in Git history. A binary release must
-be accompanied by its matching source bundle; never substitute an
-older image just because its filename looks similar.
 
 ## Repository layout
 
