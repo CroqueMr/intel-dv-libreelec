@@ -1,9 +1,8 @@
 # Hardware requirements
 
-The tested LE platform is an Intel Core i7-11390H / Iris Xe system, connected
+The tested LE platform is an Intel Core i7-11390H Geekom IT11 / Iris Xe system, connected
 through native HDMI to an LG G5. Results apply to that route, not every mini-PC
-sold with the same CPU. The earlier Core Ultra 5 226V evidence uses the shared
-Linux/mpv implementation, not this Kodi image.
+sold with the same CPU.
 
 ## Conditions for automatic DV output
 
@@ -26,10 +25,7 @@ resolution source does not make this a qualified 1080p-output implementation.
 ## Performance reporting
 
 Report the exact CPU, PCI/display driver, HDMI route, TV, source profile/codec,
-resolution/rate, visible subtitles, cooling and steady-state frame counters.
-Separate startup, seeking, pause/resume and track changes from uninterrupted
-playback. Temporary interaction disturbances are not the same as sustained
-drops or duplicates while watching a film.
+resolution/rate, visible subtitles.
 
 GPU engine-busy percentages are not additive and are not power measurements.
 Dynamic GPU clocks can reduce power/work without producing a proportional
