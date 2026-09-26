@@ -59,11 +59,11 @@ allowlist. A suitable native HDMI route and Standard-DV display are also needed.
 | Family | Example CPUs | Release status |
 | --- | --- | --- |
 | Tiger Lake / Iris Xe | Core i7-11390H, i5-1135G7, i7-1165G7 | **i7-11390H tested with this LE/Kodi implementation**; other models untested. |
-| Rocket Lake | Core i5-11500, i7-11700 with enabled iGPU | Driver-eligible candidate; board HDMI route and performance untested. |
-| Alder Lake / Raptor Lake / refresh | 12th–14th-generation Core with supported iGPU | Driver-eligible candidates; model-by-model validation required. |
-| Alder Lake-N / Twin Lake | N95, N97, N100, N200, N150, N250 | Driver-eligible candidates; smaller GPUs may require further performance work. |
-| Meteor Lake / Arrow Lake | Core Ultra 100 / 200 H, U or S where the display stack qualifies | Candidate families, not a blanket compatibility claim. |
-| Lunar Lake | Core Ultra 200V, including 226V | Shared driver/transport previously tested on 226V with mpv; **this LE/Kodi image still needs device-specific qualification**. |
+| Rocket Lake | Core i5-11500, i7-11700 with enabled iGPU | Driver-eligible candidate; to be tested |
+| Alder Lake / Raptor Lake / refresh | 12th–14th-generation Core with supported iGPU | Driver-eligible candidate; to be tested  |
+| Alder Lake-N / Twin Lake | N95, N97, N100, N200, N150, N250 | Driver-eligible candidates; Driver-eligible candidate; to be tested  |
+| Meteor Lake / Arrow Lake | Core Ultra 100 / 200 H, U or S where the display stack qualifies | Driver-eligible candidate; to be tested  |
+| Lunar Lake | Core Ultra 200V | Tested on 226V; orher models untested. |
 
 **Performance must be analyzed on every setup**, including resolution,
 frame rate, FEL workload, subtitles and cooling. Eligibility is not a promise
