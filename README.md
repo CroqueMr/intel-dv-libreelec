@@ -1,4 +1,4 @@
-# Intel DV for LibreELEC
+# Intel Dolby Vision for LibreELEC
 
 Native Dolby Vision playback in Kodi on compatible Intel HDMI systems.
 
