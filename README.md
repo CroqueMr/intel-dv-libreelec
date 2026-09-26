@@ -58,7 +58,7 @@ allowlist. A suitable native HDMI route and Standard-DV display are also needed.
 
 | Family | Example CPUs | Release status |
 | --- | --- | --- |
-| Tiger Lake / Iris Xe | Core i7-11390H, i5-1135G7, i7-1165G7 | **i7-11390H tested with this LE/Kodi implementation**; other models untested. |
+| Tiger Lake / Iris Xe | Core i7-11390H, i5-1135G7, i7-1165G7 | **Tested on 11390H; other models untested. |
 | Rocket Lake | Core i5-11500, i7-11700 with enabled iGPU | Driver-eligible candidate; to be tested |
 | Alder Lake / Raptor Lake / refresh | 12th–14th-generation Core with supported iGPU | Driver-eligible candidate; to be tested  |
 | Alder Lake-N / Twin Lake | N95, N97, N100, N200, N150, N250 | Driver-eligible candidate; to be tested  |
