@@ -14,10 +14,28 @@ in Kodi's log and ends playback cleanly when a file has unmatched trailing base
 pictures. DV metadata, pixel processing, GPU rendering and non-DV playback are
 unchanged.
 
-Private candidate limitation: seeking within the synthetic independently coded
-"Woman at 80s" sample can stall after the seek. Start-to-end picture-order
-validation must not be interpreted as seek validation. This candidate is not
-ready for public release until that regression is resolved.
+After a seek, a bounded FFmpeg header probe locates a base-layer entry point
+preceding a recoverable enhancement-layer anchor. Kodi retains the requested
+start time and discards preroll through its normal player path. Layer state is
+reset and aligned at that anchor rather than assuming both layers share an IDR
+boundary. Missing anchors and malformed input are bounded and diagnosed, not
+replaced with neighbouring pictures. This changes only eligible native DV seeks;
+normal HDR/SDR seek routing is unchanged.
+
+The independently coded test sample now passes repeated seek and uninterrupted
+playback checks on the private fel3 image. See [VALIDATION.md](VALIDATION.md) for
+the exact scope; these checks do not qualify every possible stream.
+
+### New patches in R0.1.0-rc3-opt1
+
+| Patch | User-visible purpose | Scope |
+| --- | --- | --- |
+| `kodi-9992-kernel-log.patch` | Include relevant kernel DV rejection reasons in Kodi's log. | Diagnostic only; bounded background reads, deduplication, rate limiting and an independent disable switch. |
+| `kodi-9993-fel-presentation-pairing.patch` | Correct FEL picture order and restore accurate seeking in affected files. | Picture pairing and random access; no new shader, tone mapping, metadata format or kernel policy. |
+
+The release retains existing opt1 optimizations and earlier diagnostic patches.
+It adds no new FFmpeg, libplacebo or Linux patch compared with rc2-opt1.
+For per-file details and removal boundaries, see [patches/README.md](../patches/README.md).
 
 ## linux
 

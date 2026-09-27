@@ -1,8 +1,9 @@
 # Changelog
 
-## R0.1.0-rc3-opt1
+## R0.1.0-rc3-opt1 (unreleased)
 
-- **Kernel DV diagnostics now included in `kodi.log`** for easier troubleshooting with a single file.
+- **Improved diagnostics:** relevant kernel Dolby Vision errors are now included in `kodi.log`, making playback issues easier to investigate.
+- **More reliable Profile 7 FEL playback:** fixes picture-order issues and freezes after seeking in affected files, while preserving the requested playback position.
 
 ## R0.1.0-rc2-opt1
 

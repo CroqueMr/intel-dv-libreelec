@@ -94,6 +94,33 @@ not mean the previously published rc1 image contains these unreleased changes.
 
 ## Image checks
 
+### FEL pairing and seek revision (private fel3 image)
+
+The full LibreELEC image was rebuilt and installed on the i7-11390H. Its runtime
+sources match the reviewed patch inputs; no temporary binary override remains.
+All 28 patches apply to the pinned sources. The 18 C/C++ host checks pass with
+ASAN/UBSAN and the 31 Python checks pass. This image remains private pending
+release approval; a final public version label will require its own build receipt.
+
+The independently coded FEL sample was compared with uninterrupted enhancement
+decode: 2,876 reference pictures, followed by seeks to 80, 20, 103, 4, 60 and 0s,
+with at least 100 post-target pixel hashes checked per seek. All compared pixels
+match, and the first post-target picture is within 50ms of the requested time.
+Software decoding is used only by that offline comparison, not by the player.
+Two unmatched trailing base pictures in the sample remain explicitly diagnosed.
+
+On the installed image, all six repeated seeks resumed at the requested positions
+and advanced normally; pause/resume and stop restored the display. An uninterrupted
+run reached EOF. Its 109-second steady interval contains 2,620 native render
+decisions, with no duplicate/backward picture timestamps, >1.5-frame scheduling
+gaps or drop-log entries. Transient action-time warnings are retained separately.
+These are native scheduling observations, not an external HDMI capture.
+
+The preceding candidate also passed bounded single/dual-track CM4 playback
+checks. Successful presentation reports FEL and CM2.9/CM4 through Kodi's native
+HDR detail; stopping clears the active HDMI-DV status. The final change does not
+alter shaders, metadata serialization, the kernel or other profile pipelines.
+
 ### Kernel-log bridge revision
 
 R0.1.0-rc3-opt1 adds a diagnostics-only Kodi patch; all 27 patches apply to the
