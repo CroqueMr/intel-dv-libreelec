@@ -4222,7 +4222,7 @@ index db4d756..09612b0 100644
 +#endif
 --- /dev/null
 +++ b/tools/dvbridge/dvbridge_render.c
-@@ -0,0 +1,290 @@
+@@ -0,0 +1,327 @@
 +/* SPDX-License-Identifier: GPL-3.0-or-later */
 +/* Reconstruct video at full precision, then pack the HDMI transport with frame-matched metadata. */
 +#include "dvbridge_render.h"
@@ -4248,7 +4248,36 @@ index db4d756..09612b0 100644
 +    bool called, failed;
 +    const uint32_t *packets;
 +    uint32_t count, flip;
++    pl_shader native_shader;
++    bool early_mask;
 +};
++
++static struct pl_hook_res skip_inactive_area(struct active_mask *mask,
++                                             const struct pl_hook_params *p)
++{
++    mask->native_shader = p->sh;
++    struct pl_shader_var vars[] = {
++        {.var=pl_var_vec4("early_area"), .data=mask->rect, .dynamic=true},
++        {.var={.name="early_words", .type=PL_VAR_UINT, .dim_v=4, .dim_m=1, .dim_a=128},
++         .data=mask->packets, .dynamic=true},
++        {.var=pl_var_uint("early_count"), .data=&mask->count, .dynamic=true},
++        {.var=pl_var_uint("early_flip"), .data=&mask->flip, .dynamic=true}};
++    struct pl_custom_shader shader = {
++        .input=PL_SHADER_SIG_COLOR, .output=PL_SHADER_SIG_COLOR,
++        .description="Skip reconstruction outside the DV active picture",
++        .variables=vars, .num_variables=4,
++        .body=
++        "ivec2 ep=ivec2(gl_FragCoord.xy); if(early_flip!=0u) ep.y=2159-ep.y;\n"
++        // Keep boundary pairs together: their chroma also uses the active neighbor.
++        "int ex=ep.x&~1;\n"
++        "if(float(ex+1)<early_area.x || float(ex)>=early_area.z || float(ep.y)<early_area.y || float(ep.y)>=early_area.w){\n"
++        "uint ei=uint(ep.y*3840+ep.x), ek=ei/3072u, ev=0u;\n"
++        "if(ek<early_count){uint eb=ei%1024u, ew=ek*128u+eb/8u;\n"
++        "ev=(early_words[ew/4u][int(ew%4u)]>>(7u-eb%8u))&1u;}\n"
++        "return vec4(128.0,16.0,float(ev*16u),255.0)/255.0;}\n"};
++    mask->failed = pl_shader_is_compute(p->sh) || !pl_shader_custom(p->sh, &shader);
++    return (struct pl_hook_res){.failed=mask->failed, .output=PL_HOOK_SIG_NONE};
++}
 +
 +/* Same arithmetic/packing as pack_gles300.frag. Subgroup exchange replaces
 + * only the full-precision intermediate texture fetch of the adjacent pixel.
@@ -4256,6 +4285,8 @@ index db4d756..09612b0 100644
 +static struct pl_hook_res pack_active_area(void *priv, const struct pl_hook_params *p)
 +{
 +    struct active_mask *mask = priv;
++    if (p->stage == PL_HOOK_NATIVE)
++        return skip_inactive_area(mask, p);
 +    mask->called = true;
 +    struct pl_shader_var vars[] = {
 +        {.var = pl_var_vec4("active_area"), .data = mask->rect, .dynamic = true},
@@ -4285,7 +4316,9 @@ index db4d756..09612b0 100644
 +        "uint value=(metadata_words[byte_index/4u][int(byte_index%4u)]>>(7u-bit%8u))&1u;\n"
 +        "uint parity=uint(bitCount(c>>1u)+bitCount(y))&1u; c=(c&4094u)|(value^parity); }\n"
 +        "color=vec4(float(c>>4u),float(y>>4u),float((y&15u)|((c&15u)<<4u)),255.0)/255.0;\n"};
-+    mask->failed = p->stage != PL_HOOK_OUTPUT || pl_shader_is_compute(p->sh) ||
++    // An early return must reach the transport target, never an intermediate image.
++    mask->failed = mask->failed || p->stage != PL_HOOK_OUTPUT ||
++                   (mask->early_mask && mask->native_shader != p->sh) || pl_shader_is_compute(p->sh) ||
 +                   !pl_shader_custom(p->sh, &shader);
 +    return (struct pl_hook_res){.failed=mask->failed, .output=PL_HOOK_SIG_NONE};
 +}
@@ -4431,9 +4464,13 @@ index db4d756..09612b0 100644
 +                                       3840 - margins[1], 2160 - margins[3]}};
 +    mask.flip = flip;
 +    mask.packets = dvbridge_packets(r->pending, &mask.count);
-+    const struct pl_hook hook = {.stages = PL_HOOK_OUTPUT, .input = PL_HOOK_SIG_COLOR,
++    mask.early_mask = packed && geometry.source_width == 3840 && geometry.source_height == 2160 &&
++                      (margins[0] || margins[1] || margins[2] || margins[3]);
++    const struct pl_hook hook = {
++        .stages = PL_HOOK_OUTPUT | (mask.early_mask ? PL_HOOK_NATIVE : 0),
++        .input = PL_HOOK_SIG_COLOR,
 +        .priv = &mask, .hook = packed ? pack_active_area : mask_active_area,
-+        .signature = packed ? 0x4456425246555301ULL : 0x445642524c350001ULL};
++        .signature = packed ? 0x4456425246555302ULL : 0x445642524c350001ULL};
 +    const struct pl_hook *hooks[] = {&hook};
 +    params.hooks = hooks;
 +    params.num_hooks = 1;

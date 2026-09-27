@@ -78,10 +78,12 @@ int main(int argc,char **argv)
     AVDOVIDataMapping *mapping=av_dovi_get_mapping(m); mapping->nlq_method_idc=AV_DOVI_NLQ_LINEAR_DZ;
     for(int c=0;c<3;c++) { mapping->nlq[c].nlq_offset=512; mapping->nlq[c].linear_deadzone_slope=1; }
     unsigned failures=0;
-    for(int fel=0;fel<2;fel++) for(int mask=0;mask<2;mask++) for(int flip=0;flip<2;flip++) {
+    for(int fel=0;fel<2;fel++) for(int mask=0;mask<3;mask++) for(int flip=0;flip<2;flip++) {
         h->disable_residual_flag=!fel; frame.enhancement_layer=fel?&el:NULL;
-        l5->l5.top_offset=mask?37:0; l5->l5.bottom_offset=mask?93:0;
-        l5->l5.left_offset=mask?19:0; l5->l5.right_offset=mask?41:0;
+        l5->l5.top_offset=mask==2?320:mask?37:0;
+        l5->l5.bottom_offset=mask==2?320:mask?93:0;
+        l5->l5.left_offset=mask==1?19:0;
+        l5->l5.right_offset=mask==1?41:0;
         dvbridge_renderer_reset(regular); dvbridge_renderer_reset(fused);
         assert(dvbridge_render_rgb(regular,&frame,m,bytes,0,fel?0:NAN,geometry));
         unsigned count; const uint32_t *packets=dvbridge_packets(dvbridge_render_candidate(regular),&count);

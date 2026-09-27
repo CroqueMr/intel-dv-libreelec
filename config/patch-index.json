@@ -1,4 +1,11 @@
 {
+  "patches/libplacebo/libplacebo-9910-6-centered-lanczos.patch": {
+    "summary": "Avoid redundant interpolation of aligned Lanczos3 taps",
+    "component": "libplacebo",
+    "files": {
+      "src/shaders/sampling.c": "Use exact texel fetches for eligible Lanczos3 taps; retain linear sampling for unaligned or other filter configurations."
+    }
+  },
   "patches/linux/linux-9900-00-drivers__gpu__drm__i915__display__intel_atomic.c.patch": {
     "summary": "Expose the validated Dolby Vision connector control",
     "component": "linux",
@@ -227,7 +234,7 @@
       "tools/dvbridge/dvbridge_metadata.h": "Serialize frame-matched display metadata, active area, packet identifiers and CRCs.",
       "tools/dvbridge/dvbridge_placebo.c": "Validate and map DV reshaping parameters to libplacebo.",
       "tools/dvbridge/dvbridge_placebo.h": "Define the validated color/reshaping representation.",
-      "tools/dvbridge/dvbridge_render.c": "Reconstruct full-precision video and select exact fused or composed transport rendering.",
+      "tools/dvbridge/dvbridge_render.c": "Reconstruct full-precision video, select exact transport rendering and skip reconstruction for wholly masked L5 pixel pairs.",
       "tools/dvbridge/dvbridge_render.h": "Define the shared renderer lifecycle and prepare/commit boundary.",
       "tools/dvbridge/mpv_dvbridge_cm4.h": "Preserve and serialize supported extended CM4 metadata fields with strict bounds.",
       "tools/dvbridge/pack_gles300.frag": "Pack reconstructed video and metadata into the Standard-DV RGB8 transport.",

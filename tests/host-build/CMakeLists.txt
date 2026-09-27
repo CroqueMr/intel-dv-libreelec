@@ -35,6 +35,10 @@ set_tests_properties(gles_pack gles_reshape render_lifecycle PROPERTIES ENVIRONM
 # It is not silently substituted with a software renderer or skipped as a pass.
 option(DVBRIDGE_TEST_GPU_EXACT "Build the real-GPU exact transport comparison" OFF)
 if(DVBRIDGE_TEST_GPU_EXACT)
+  add_executable(lanczos_exact "${TESTS}/lanczos_exact.c")
+  target_link_libraries(lanczos_exact PRIVATE dvbridge_core)
+  add_test(NAME lanczos_exact COMMAND lanczos_exact)
+  set_tests_properties(lanczos_exact PROPERTIES ENVIRONMENT "EGL_PLATFORM=surfaceless")
   add_executable(fused_exact "${TESTS}/fused_exact.c")
   target_link_libraries(fused_exact PRIVATE dvbridge_core)
   add_test(NAME fused_exact COMMAND fused_exact

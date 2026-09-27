@@ -13,12 +13,13 @@ relabelled as tests of a different binary.
 | --- | --- |
 | Native HDMI playback | P5, P7 FEL, P8.1 CM4, P8.4 CM4 and P10 CM4 on i7-11390H. |
 | FEL reconstruction | Demonstrable enhancement-layer contribution; exact GPU output comparisons, including active-area masking and orientation. |
-| Optimized renderer | Eight deterministic 4K cases, 33,177,600 transport bytes per case, equal to the separate full-precision path. Additional real-frame comparisons on six sources. |
+| Optimized renderer | Twelve deterministic 4K cases, 33,177,600 transport bytes per case, equal to the separate full-precision path, including 320-pixel L5 masks. Additional real-frame comparisons on six sources. |
+| Lanczos tap sampling | 288 exact FP32 comparisons against linear tap sampling, covering float/UNORM input, one/two components, both axes, 2x/4x enlargement, downscaling, offsets, crops, identity-size fallback and custom clamp/taper settings. |
 | Steady playback | Bounded uninterrupted cadence checks, including 23.976 fps; no observed increasing steady drop counters or irregular new-frame intervals in successful runs. |
 | Controls and restore | Pause, resume, seek, player OSD, subtitles, audio-track switching, stop and return to the 4K60 interface. |
 | Non-DV control | HDR10 source without RPU stays on Kodi's native HDR path, with the DV connector property disabled. |
 | Upstream menus | Original LibreELEC settings/service; no activation addon or environment switch. |
-| Software | 14 C/C++ host checks with ASan/UBSan; 14 Python source/installer/image-path checks. |
+| Software | 14 C/C++ host checks with ASan/UBSan; 27 Python source/installer/image-path checks. |
 
 P7 MEL has explicit code/software coverage; P8.2 shares the metadata/reshaping
 pipeline. Neither has a dedicated physical LE qualification result in this
@@ -74,8 +75,22 @@ tests inject failures; they do not certify an HDMI output. Assertions stay
 enabled even for Release test builds.
 
 On a suitable real GPU, `-DDVBRIDGE_TEST_GPU_EXACT=ON` adds the strict 4K
-fused-versus-composed byte comparison. It requires fragment basic/quad subgroup
-support and is not enabled for the default software-only suite.
+fused-versus-composed byte comparison and the FP32 Lanczos comparison. The former
+requires fragment basic/quad subgroup support. Neither is enabled for the default
+software-only suite. Build the test dependencies with the complete current patch
+series: an older libplacebo library cannot validate a new optimization.
+
+The Lanczos test uses explicit unity blur to select the original linear-tap path
+and default blur to exercise eligible optimized taps, with otherwise identical
+filter settings. It compares every FP32 output byte before transport quantization.
+The fallback cases also protect against choosing the wrong aligned axis for a
+1:1 crop or fractional shift. The test is not installed in the playback image.
+
+The combined L5 and tap-fetch candidates were qualified on Iris Xe i7-11390H.
+Their earlier bounded P7 FEL/CM4 23.976 fps run showed no steady-state cadence
+faults in the software trace. This does not establish an N100 performance result
+or constitute an external HDMI frame capture. The source regression checks do
+not mean the previously published rc1 image contains these unreleased changes.
 
 ## Image checks
 

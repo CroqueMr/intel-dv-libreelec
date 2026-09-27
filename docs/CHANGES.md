@@ -59,6 +59,7 @@ the shared renderer; its internal files are listed individually below.
 | [libplacebo-9910-3.patch](../patches/libplacebo/libplacebo-9910-3.patch) | Enable float texture filtering only when supported. |
 | [libplacebo-9910-4.patch](../patches/libplacebo/libplacebo-9910-4.patch) | Prevent rounding noise from creating false FEL residuals. |
 | [libplacebo-9910-5-custom-prelude.patch](../patches/libplacebo/libplacebo-9910-5-custom-prelude.patch) | Place custom GLES extension directives before shader declarations. |
+| [libplacebo-9910-6-centered-lanczos.patch](../patches/libplacebo/libplacebo-9910-6-centered-lanczos.patch) | Avoid redundant interpolation of aligned Lanczos3 taps without changing the filter. |
 
 | Changed source file | High-level change |
 | --- | --- |
@@ -68,6 +69,7 @@ the shared renderer; its internal files are listed individually below.
 | `src/opengl/gpu.c` | Expose actual subgroup, float texture, filtering and framebuffer capabilities. |
 | `src/renderer.c` | Honor full-precision intermediate render-target requirements. |
 | `src/shaders/colorspace.c` | Keep neutral FEL residuals zero despite normalization/filtering roundoff. |
+| `src/shaders/sampling.c` | Fetch aligned Lanczos3 taps directly; keep linear sampling for other filters and unaligned geometry. |
 
 ## kodi
 
@@ -95,7 +97,7 @@ the shared renderer; its internal files are listed individually below.
 | `tools/dvbridge/dvbridge_metadata.h` | Serialize frame-matched display metadata, active area, packet identifiers and CRCs. |
 | `tools/dvbridge/dvbridge_placebo.c` | Validate and map DV reshaping parameters to libplacebo. |
 | `tools/dvbridge/dvbridge_placebo.h` | Define the validated color/reshaping representation. |
-| `tools/dvbridge/dvbridge_render.c` | Reconstruct full-precision video and select exact fused or composed transport rendering. |
+| `tools/dvbridge/dvbridge_render.c` | Reconstruct full-precision video, select exact transport rendering and skip reconstruction for wholly masked L5 pixel pairs. |
 | `tools/dvbridge/dvbridge_render.h` | Define the shared renderer lifecycle and prepare/commit boundary. |
 | `tools/dvbridge/mpv_dvbridge_cm4.h` | Preserve and serialize supported extended CM4 metadata fields with strict bounds. |
 | `tools/dvbridge/pack_gles300.frag` | Pack reconstructed video and metadata into the Standard-DV RGB8 transport. |

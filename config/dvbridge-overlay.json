@@ -6,6 +6,7 @@
   "activation": "automatic_when_stream_display_and_transport_are_eligible",
   "settings": "upstream_unmodified",
   "files": {
+    "packages/addons/addon-depends/multimedia-tools-depends/libplacebo/patches/libplacebo-9910-6-centered-lanczos.patch": "308ddc9d1c8747358e87b8833388cc3289d20a8d45311562ace48e8c9b66c06f",
     "packages/addons/addon-depends/multimedia-tools-depends/libplacebo/package.mk": "651652ab8873841b2c4004b36c9d2a2f28dd10298d564cc5a515c206b5fa6a13",
     "packages/addons/addon-depends/multimedia-tools-depends/libplacebo/patches/libplacebo-9900-0-src__dispatch.c.patch": "6011006138e5c40670e4d7eb83cf86523354e23d4ca7ea2a622eafd4dee581bb",
     "packages/addons/addon-depends/multimedia-tools-depends/libplacebo/patches/libplacebo-9900-1-src__opengl__gpu.c.patch": "acc0e901671fc8a0c7fa442dbb69ef149d524c1af47ad40b6d7da919d3f820ad",
@@ -19,7 +20,7 @@
     "projects/Generic/patches/ffmpeg/ffmpeg-9900-00-libavcodec__dovi_rpudec.c.patch": "b83a9f89befad875d90bd483dd5fdea4e293af037ac2f8c16ebf1bd26d30e2c4",
     "projects/Generic/patches/ffmpeg/ffmpeg-9900-01-libavformat__isom_tags.c.patch": "c86fe701ec00bb74fee4b7d8e87133d2d7cb43ce3d217f3ec128f8bcc9487fbb",
     "projects/Generic/patches/ffmpeg/ffmpeg-9900-02-libavutil__dovi_meta.h.patch": "953cfb01339263c02c7932eb67e30ea6603613a1800fa4041f46b5f3ffb10fe0",
-    "projects/Generic/patches/kodi/kodi-9990-native-dv.patch": "9ffac6f7481e56a2c5412933bf670c42433701e319ea470e59d14b28e31d038b",
+    "projects/Generic/patches/kodi/kodi-9990-native-dv.patch": "0f0fa4dd1324271ad8473334da78b9b9021e3a24d4ce80c052d252f122e1439b",
     "projects/Generic/patches/linux/linux-9900-00-drivers__gpu__drm__i915__display__intel_atomic.c.patch": "a0f9d977651920c743b9ce4dcc826f260edf22d6663912da33c9dbcd4cebd5eb",
     "projects/Generic/patches/linux/linux-9900-01-drivers__gpu__drm__i915__display__intel_display.c.patch": "de5749ed197ddb6eb192392daf3cfad6a0c0a5a5b7d50ed90a0b04fb32b90f98",
     "projects/Generic/patches/linux/linux-9900-02-drivers__gpu__drm__i915__display__intel_display_params.c.patch": "e5b0a904d571f3c56815d45bbc7ed3c5a79f51de952d4b90819f3be609b576d5",
@@ -35,6 +36,7 @@
   "schema": 2,
   "release": "0.1.0-rc1",
   "source_map": {
+    "packages/addons/addon-depends/multimedia-tools-depends/libplacebo/patches/libplacebo-9910-6-centered-lanczos.patch": "patches/libplacebo/libplacebo-9910-6-centered-lanczos.patch",
     "packages/addons/addon-depends/multimedia-tools-depends/libplacebo/package.mk": "overlay/packages/addons/addon-depends/multimedia-tools-depends/libplacebo/package.mk",
     "packages/addons/addon-depends/multimedia-tools-depends/libplacebo/patches/libplacebo-9900-0-src__dispatch.c.patch": "patches/libplacebo/libplacebo-9900-0-src__dispatch.c.patch",
     "packages/addons/addon-depends/multimedia-tools-depends/libplacebo/patches/libplacebo-9900-1-src__opengl__gpu.c.patch": "patches/libplacebo/libplacebo-9900-1-src__opengl__gpu.c.patch",

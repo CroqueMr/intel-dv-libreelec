@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.0-rc1-opt1
+
+- Avoid unnecessary reconstruction outside the Dolby Vision active picture,
+  while preserving the exact video and metadata transport bytes.
+- Extend the GPU regression check to cover 320-pixel top/bottom active-area masks.
+- Avoid redundant bilinear tap interpolation in eligible libplacebo Lanczos3
+  passes, including full-frame FEL reconstruction, without changing the filter.
+- Check exact FP32 filter output against the original linear-sampling path,
+  including shifted/cropped input and the fallback cases.
+- No change to decoding, HDMI HDR/SDR selection, metadata or kernel behavior.
+
 ## Repository maintenance
 
 - Group scripts in `tools/`, manifests in `config/` and release notes in `docs/releases/`.
