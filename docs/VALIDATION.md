@@ -19,7 +19,7 @@ relabelled as tests of a different binary.
 | Controls and restore | Pause, resume, seek, player OSD, subtitles, audio-track switching, stop and return to the 4K60 interface. |
 | Non-DV control | HDR10 source without RPU stays on Kodi's native HDR path, with the DV connector property disabled. |
 | Upstream menus | Original LibreELEC settings/service; no activation addon or environment switch. |
-| Software | 14 C/C++ host checks with ASan/UBSan; 27 Python source/installer/image-path checks. |
+| Software | R0.2.1-opt1: 18 C/C++ host checks with ASan/UBSan; 31 Python source/installer/image-path checks. |
 
 P7 MEL has explicit code/software coverage; P8.2 shares the metadata/reshaping
 pipeline. Neither has a dedicated physical LE qualification result in this
@@ -90,17 +90,26 @@ The combined L5 and tap-fetch candidates were qualified on Iris Xe i7-11390H.
 Their earlier bounded P7 FEL/CM4 23.976 fps run showed no steady-state cadence
 faults in the software trace. This does not establish an N100 performance result
 or constitute an external HDMI frame capture. The source regression checks do
-not mean the previously published rc1 image contains these unreleased changes.
+not mean the original rc1 image contains the later optimization changes.
 
 ## Image checks
+
+### R0.2.1-opt1 public packaging
+
+The image was rebuilt through LibreELEC's native image pipeline with the public
+version embedded in the system. The player and kernel are byte-identical to the
+qualified private fel3 image described below. All overlay inputs match the
+published manifest, the image dependency audit passes, and the 18 C/C++ plus
+31 Python checks were rerun successfully. The newly packaged disk image was not
+separately installed for another physical HDMI run.
 
 ### FEL pairing and seek revision (private fel3 image)
 
 The full LibreELEC image was rebuilt and installed on the i7-11390H. Its runtime
 sources match the reviewed patch inputs; no temporary binary override remains.
 All 28 patches apply to the pinned sources. The 18 C/C++ host checks pass with
-ASAN/UBSAN and the 31 Python checks pass. This image remains private pending
-release approval; a final public version label will require its own build receipt.
+ASAN/UBSAN and the 31 Python checks pass. This was the private qualification
+image preceding the public packaging described above.
 
 The independently coded FEL sample was compared with uninterrupted enhancement
 decode: 2,876 reference pictures, followed by seeks to 80, 20, 103, 4, 60 and 0s,
@@ -121,9 +130,9 @@ checks. Successful presentation reports FEL and CM2.9/CM4 through Kodi's native
 HDR detail; stopping clears the active HDMI-DV status. The final change does not
 alter shaders, metadata serialization, the kernel or other profile pipelines.
 
-### Kernel-log bridge revision
+### Earlier kernel-log-only candidate (before FEL integration)
 
-R0.1.0-rc3-opt1 adds a diagnostics-only Kodi patch; all 27 patches apply to the
+The initial rc3 preparation added a diagnostics-only Kodi patch; all 27 patches applied to the
 pinned sources without fuzz. All 31 Python source tests pass. The 17 C/C++ host tests pass with ASAN/UBSAN (GL
 leak checks disabled). New tests cover kernel-origin filtering, stale/duplicate
 records, size bounds, nonblocking access, ring overruns and permission failure.

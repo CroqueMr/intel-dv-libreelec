@@ -39,7 +39,7 @@
     "projects/Generic/patches/kodi/kodi-9993-fel-presentation-pairing.patch": "2b348cd9ff7d28be214f88748e33a91058ee0927d3cc1bead65f758a812e7748"
   },
   "schema": 2,
-  "release": "0.1.0-rc3-opt1",
+  "release": "0.2.1-opt1",
   "source_map": {
     "packages/addons/addon-depends/multimedia-tools-depends/libplacebo/patches/libplacebo-9910-6-centered-lanczos.patch": "patches/libplacebo/libplacebo-9910-6-centered-lanczos.patch",
     "packages/addons/addon-depends/multimedia-tools-depends/libplacebo/package.mk": "overlay/packages/addons/addon-depends/multimedia-tools-depends/libplacebo/package.mk",

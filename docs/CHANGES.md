@@ -26,7 +26,7 @@ The independently coded test sample now passes repeated seek and uninterrupted
 playback checks on the private fel3 image. See [VALIDATION.md](VALIDATION.md) for
 the exact scope; these checks do not qualify every possible stream.
 
-### New patches in R0.1.0-rc3-opt1
+### New patches in R0.2.1-opt1
 
 | Patch | User-visible purpose | Scope |
 | --- | --- | --- |
@@ -55,6 +55,7 @@ flags from `intel_hdmi.c` on a rate-limited rejection, without changing policy.
 | [linux-9900-08-drivers__video__hdmi.c.patch](../patches/linux/linux-9900-08-drivers__video__hdmi.c.patch) | Encode and validate Dolby Vision HDMI signaling. |
 | [linux-9900-09-include__linux__hdmi.h.patch](../patches/linux/linux-9900-09-include__linux__hdmi.h.patch) | Define shared Dolby Vision HDMI signaling structures. |
 | [linux-9901-native-hdmi-level-shifter.patch](../patches/linux/linux-9901-native-hdmi-level-shifter.patch) | Recognize native HDMI level shifters without allowing active DP conversion. |
+| [linux-9902-dv-diagnostics.patch](../patches/linux/linux-9902-dv-diagnostics.patch) | Explain rejected DV link configurations through rate-limited kernel diagnostics. |
 
 | Changed source file | High-level change |
 | --- | --- |
@@ -119,6 +120,9 @@ The shared shaders, metadata helpers and playback decisions are unchanged.
 | Patch | Purpose |
 | --- | --- |
 | [kodi-9990-native-dv.patch](../patches/kodi/kodi-9990-native-dv.patch) | Integrate automatic native Dolby Vision playback and exact GPU transport. |
+| [kodi-9991-diagnostics.patch](../patches/kodi/kodi-9991-diagnostics.patch) | Add switchable playback/output diagnostics with bounded failure summaries. |
+| [kodi-9992-kernel-log.patch](../patches/kodi/kodi-9992-kernel-log.patch) | Copy relevant kernel DV rejection reasons into Kodi's log. |
+| [kodi-9993-fel-presentation-pairing.patch](../patches/kodi/kodi-9993-fel-presentation-pairing.patch) | Correct FEL picture pairing and recover accurate playback after seeks. |
 
 | Changed source file | High-level change |
 | --- | --- |

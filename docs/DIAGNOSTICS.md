@@ -54,7 +54,7 @@ an automatic anonymizer; redact sensitive fields before posting publicly.
 
 ## Kernel DV messages in kodi.log
 
-Starting with R0.1.0-rc3-opt1, an output rejection schedules a bounded background
+Starting with R0.2.1-opt1, an output rejection schedules a bounded background
 read of `/dev/kmsg`. Recent kernel-origin `DVBridge:` records are copied through
 Kodi's own logger with the prefix **`DVBridge kernel:`**, original sequence number
 and monotonic boot timestamp. For these HDMI rejections, share `kodi.log` first.

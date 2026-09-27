@@ -3,7 +3,18 @@
 Apply each component's patches in filename order. Exact pinned versions are in
 [`docs/VERSIONS.md`](../docs/VERSIONS.md); the complete file-level index is in
 [`config/patch-index.json`](../config/patch-index.json). This guide highlights
-the two additions prepared for R0.1.0-rc3-opt1.
+the two additions prepared for R0.2.1-opt1.
+
+| Component | Patch count |
+| --- | ---: |
+| Linux / Intel display | 12 |
+| FFmpeg | 3 |
+| libplacebo | 9 |
+| Kodi / shared DV renderer | 4 |
+| **Total** | **28** |
+
+The two LibreELEC recipe overrides are separate build inputs, not patches.
+Compared with rc2-opt1 (26 patches), 9992 and 9993 add two Kodi patches.
 
 ## Kodi 9992 — kernel diagnostic bridge
 
