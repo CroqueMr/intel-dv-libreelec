@@ -172,3 +172,13 @@ The shared shaders, metadata helpers and playback decisions are unchanged.
 
 No LibreELEC Settings, systemd activation service or skin patch is included.
 The separate HDR10 precision retry is not a DV metadata or tone-mapping change.
+
+## Kernel diagnostics in Kodi
+
+`kodi-9992-kernel-log.patch` adds a separate, removable background logging hook:
+
+- `DRMAtomic.cpp`: request kernel evidence only after a bounded DV output failure.
+- `DVBridgeKernelLog.h`: parse kernel records; exclude userspace, stale, duplicate and unrelated messages.
+- `DVBridgeKernelLogReader.h`: read the kernel ring without blocking rendering or clearing the system log.
+
+`DVBRIDGE_KERNEL_LOG=0` disables the hook. No video processing or output policy changes.

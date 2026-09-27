@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 #pragma once
+#include "jobs/JobManager.h"
 struct CApplicationPlayer { bool HasVisibleOverlay() const { return false; } };
 struct TestWindowManager { bool HasVisibleControls() const { return false; } };
 struct TestGUI { TestWindowManager& GetWindowManager() { static TestWindowManager v; return v; } };
@@ -10,6 +11,7 @@ struct TestComponents
 };
 struct CServiceBroker
 {
+  static CJobManager* GetJobManager() { static CJobManager v; return &v; }
   static TestGUI* GetGUI() { static TestGUI v; return &v; }
   static TestLogging& GetLogging() { static TestLogging v; return v; }
   static TestComponents& GetAppComponents() { static TestComponents v; return v; }

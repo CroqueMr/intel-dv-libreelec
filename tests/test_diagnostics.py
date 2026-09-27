@@ -10,6 +10,24 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 
 class Diagnostics(unittest.TestCase):
+    def test_kernel_log_filter(self):
+        compiler = shutil.which('g++')
+        if not compiler:
+            self.skipTest('C++ compiler required')
+        spec = importlib.util.spec_from_file_location('verify_kernel_log', ROOT / 'tools/verify.py')
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        patch = (ROOT / 'patches/kodi/kodi-9992-kernel-log.patch').read_text()
+        header = module.new_file(patch, 'xbmc/utils/DVBridgeKernelLog.h')
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / 'utils').mkdir()
+            (root / 'utils/DVBridgeKernelLog.h').write_bytes(header)
+            subprocess.run([compiler, '-std=c++17', '-Wall', '-Wextra', '-Werror', '-UNDEBUG',
+                            '-I' + str(root), str(ROOT / 'tests/kernel_log_filter.cpp'),
+                            '-o', str(root / 'check')], check=True)
+            subprocess.run([str(root / 'check')], check=True)
+
     def test_rate_limit(self):
         compiler = shutil.which('g++')
         if not compiler:

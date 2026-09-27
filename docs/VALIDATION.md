@@ -94,6 +94,15 @@ not mean the previously published rc1 image contains these unreleased changes.
 
 ## Image checks
 
+### Kernel-log bridge revision
+
+R0.1.0-rc3-opt1 adds a diagnostics-only Kodi patch; all 27 patches apply to the
+pinned sources without fuzz. All 31 Python source tests pass. The 17 C/C++ host tests pass with ASAN/UBSAN (GL
+leak checks disabled). New tests cover kernel-origin filtering, stale/duplicate
+records, size bounds, nonblocking access, ring overruns and permission failure.
+Kernel IO is injected in those tests; they do not read the host's kernel log.
+No physical HDMI requalification is claimed for this logging-only revision.
+
 ### Opt1 diagnostics revision
 
 The diagnostic revision was rebuilt through the native LibreELEC image pipeline,

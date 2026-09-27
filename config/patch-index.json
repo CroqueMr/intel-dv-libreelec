@@ -260,5 +260,14 @@
     "files": {
       "drivers/gpu/drm/i915/display/intel_hdmi.c": "Add diagnostics only; preserve rendering and output decisions."
     }
+  },
+  "patches/kodi/kodi-9992-kernel-log.patch": {
+    "component": "kodi",
+    "summary": "Copy recent kernel DV rejection reasons into Kodi logs without blocking playback",
+    "files": {
+      "xbmc/windowing/gbm/drm/DRMAtomic.cpp": "Schedule bounded background kernel diagnostics after output rejection.",
+      "xbmc/utils/DVBridgeKernelLog.h": "Filter kernel-origin DV records by age and sequence number.",
+      "xbmc/windowing/gbm/drm/DVBridgeKernelLogReader.h": "Read the kernel ring without consuming other readers or polling during healthy playback."
+    }
   }
 }

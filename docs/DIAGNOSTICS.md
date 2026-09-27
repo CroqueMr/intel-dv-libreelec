@@ -38,11 +38,39 @@ anything. The report directory is also retained.
 account details or stream URLs. EDID can contain display identifiers. This is not
 an automatic anonymizer; redact sensitive fields before posting publicly.
 
-For an HDMI rejection, include **both `kodi.log` and `kernel.log`**. Kodi records
-the failed operation and errno; the Intel driver's `DVBridge: link rejected`
-message records the evaluated policy flags, including Standard-DV EDID support,
-native HDMI/LSPCON, display generation, range, bit depth and mode. Those flags
-describe the rejected configuration, not necessarily the TV's intrinsic abilities.
+## Kernel DV messages in kodi.log
+
+Starting with R0.1.0-rc3-opt1, an output rejection schedules a bounded background
+read of `/dev/kmsg`. Recent kernel-origin `DVBridge:` records are copied through
+Kodi's own logger with the prefix **`DVBridge kernel:`**, original sequence number
+and monotonic boot timestamp. For these HDMI rejections, share `kodi.log` first.
+The native Kodi debug switch still enables the additional requested-property and
+renderer details; essential kernel rejection reasons do not require it.
+
+The Intel driver's `DVBridge: link rejected` message records Standard-DV EDID
+support, native HDMI/LSPCON, display generation, range, bit depth and mode.
+Those flags describe the rejected configuration, not necessarily the TV's
+intrinsic abilities. No accepted configuration or correct TV image is inferred
+from their presence.
+
+This is not a copy of the entire kernel journal. Only DV records from the last
+15 seconds are eligible; repeats are deduplicated. Collection happens off the
+render thread, only after a rate-limited failure, with nonblocking reads and
+bounded work/output. It does not consume or clear other kernel readers. If
+access is denied, records have expired/been overwritten, or collection is
+limited, `dv-diagnostics collect` remains available for the full boot journal.
+
+### Disable or remove the bridge
+
+Set **`DVBRIDGE_KERNEL_LOG=0`** in Kodi's service environment and restart Kodi to
+disable kernel copying. For example, the systemd service override's `[Service]`
+section can contain `Environment=DVBRIDGE_KERNEL_LOG=0`. Removing that override
+restores the default on the next start. This does not disable Dolby Vision or
+change normal Kodi diagnostics.
+
+The implementation is isolated in **`kodi-9992-kernel-log.patch`**. A downstream
+build can omit it (and its overlay-manifest/index entries) without removing the
+renderer or changing HDMI policy. No kernel change is needed for this addition.
 
 ## Scope
 
@@ -50,9 +78,12 @@ This revision adds diagnostics only. It does **not** fix unsupported HDMI routes
 relax eligibility, alter shaders/metadata, or introduce an HDR fallback. The known
 repeated rejection is now observable without flooding Kodi's log, but retry
 behavior itself is unchanged. Kernel messages use the existing DRM rate limiter;
-Kodi reports at most once every five seconds per failing diagnostic object.
+Kodi failure summaries occur at most once every five seconds per failing object;
+each resulting kernel collection copies at most 16 matching records.
 
-The changes are isolated in `kodi-9991-diagnostics.patch` and
-`linux-9902-dv-diagnostics.patch` for review or removal at build time; normal users
-should simply turn off Kodi debug logging. Runtime decisions never depend on the
-diagnostic counters or on whether logging is enabled.
+The initial diagnostics are isolated in `kodi-9991-diagnostics.patch` and
+`linux-9902-dv-diagnostics.patch`. The new `kodi-9992-kernel-log.patch` depends on
+the Kodi diagnostic hook: omit it as well if removing `kodi-9991` downstream.
+Normal users can turn off Kodi debug detail and separately disable kernel copying
+as described above. Playback decisions never depend on the diagnostic counters
+or on whether logging is enabled.
