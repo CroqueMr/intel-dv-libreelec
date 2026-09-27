@@ -1,0 +1,57 @@
+--- a/tools/dvbridge/dvbridge_fel.c
++++ b/tools/dvbridge/dvbridge_fel.c
+@@ -110,11 +110,20 @@
+                 f->eof = true;
+             return result == AVERROR(EAGAIN) || result == AVERROR_EOF;
+         }
+-        frame->pts = frame->best_effort_timestamp;
+-        if (frame->format != AV_PIX_FMT_VAAPI || frame->pts == AV_NOPTS_VALUE ||
+-            (f->num_frames && frame->pts <= f->frames[f->num_frames - 1]->pts)) {
++        /* Preserve the packet's presentation identity. FFmpeg's best-effort
++         * timestamp can substitute DTS when EL has different reordering from
++         * BL; that estimate must not replace a valid exact pairing key. */
++        if (frame->pts == AV_NOPTS_VALUE)
++            frame->pts = frame->best_effort_timestamp;
++        if (frame->format != AV_PIX_FMT_VAAPI || frame->pts == AV_NOPTS_VALUE) {
+             av_frame_free(&frame);
+             return false;
++        }
++        for (unsigned i = 0; i < f->num_frames; ++i) {
++            if (f->frames[i]->pts == frame->pts) {
++                av_frame_free(&frame);
++                return false;
++            }
+         }
+         f->frames[f->num_frames++] = frame;
+     }
+@@ -222,19 +231,24 @@
+ {
+     if (!f || !frame || *frame || pts == AV_NOPTS_VALUE || !pump(f))
+         return -1;
+-    while (f->num_frames) {
+-        AVFrame *candidate = f->frames[0];
+-        if (candidate->pts > pts)
+-            return -1;
++    for (unsigned i = 0; i < f->num_frames;) {
++        AVFrame *candidate = f->frames[i];
++        if (candidate->pts > pts) {
++            ++i;
++            continue;
++        }
+         --f->num_frames;
+-        memmove(f->frames, f->frames + 1, f->num_frames * sizeof(*f->frames));
++        memmove(f->frames + i, f->frames + i + 1,
++                (f->num_frames - i) * sizeof(*f->frames));
+         if (candidate->pts == pts) {
+             *frame = candidate;
+             return 1;
+         }
+         av_frame_free(&candidate);
+     }
+-    return f->eof ? -1 : 0;
++    /* A later decoded EL frame does not prove the requested one is missing.
++     * Keep bounded lookahead and never substitute a neighbouring surface. */
++    return f->eof || f->num_frames == QUEUE_MAX ? -1 : 0;
+ }
+ 
+ bool dvbridge_fel_failed(const struct dvbridge_fel *f)

@@ -269,5 +269,12 @@
       "xbmc/utils/DVBridgeKernelLog.h": "Filter kernel-origin DV records by age and sequence number.",
       "xbmc/windowing/gbm/drm/DVBridgeKernelLogReader.h": "Read the kernel ring without consuming other readers or polling during healthy playback."
     }
+  },
+  "patches/kodi/kodi-9993-fel-presentation-pairing.patch": {
+    "component": "kodi",
+    "summary": "Preserve exact FEL frame timestamps and handle reordered enhancement output",
+    "files": {
+      "tools/dvbridge/dvbridge_fel.c": "Match decoded enhancement frames by their original presentation timestamps with bounded lookahead; do not substitute nearby frames."
+    }
   }
 }

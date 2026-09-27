@@ -8,7 +8,7 @@
 /* Real FFmpeg splitter and ownership; deterministic decoder replaces VAAPI ioctls. */
 static int64_t ready[64];
 static unsigned count;
-static bool end, bad_pts, send_error;
+static bool end, bad_pts, send_error, reorder;
 int __wrap_avcodec_open2(AVCodecContext *ctx, const AVCodec *codec, AVDictionary **options)
 {
     (void)codec; (void)options;
@@ -44,6 +44,10 @@ int __wrap_avcodec_receive_frame(AVCodecContext *ctx, AVFrame *frame)
     frame->width = 1920;
     frame->height = 1080;
     frame->best_effort_timestamp = bad_pts ? AV_NOPTS_VALUE : ready[0];
+    if (reorder) {
+        frame->pts = ready[0];
+        frame->best_effort_timestamp = ready[0] + 1000000;
+    }
     frame->buf[0] = av_buffer_alloc(8);
     assert(frame->buf[0]);
     --count;
@@ -92,11 +96,35 @@ int main(void)
     }
     assert(dvbridge_fel_take(f, 2 * 41708, &frame) == 1); /* skip stale EL after BL drop */
     av_frame_free(&frame);
-    assert(dvbridge_fel_take(f, 2 * 41708 + 1, &frame) == -1); /* never nearest-neighbour pair */
+    assert(dvbridge_fel_take(f, 2 * 41708 + 1, &frame) == 0); /* wait, never nearest-neighbour pair */
     assert(dvbridge_fel_take(f, 3 * 41708, &frame) == 1);
     dvbridge_fel_reset(f);
     assert(frame->pts == 3 * 41708 && frame->buf[0]); /* downstream ref survives seek */
     av_frame_free(&frame);
+    p->pts = p->dts = 0;
+    assert(dvbridge_fel_submit(f, p));
+    assert(dvbridge_fel_take(f, 0, &frame) == 1);
+    av_frame_free(&frame);
+    dvbridge_fel_reset(f);
+    reorder = true;
+    const int64_t order[] = {0, 83000, 125000, 42000, 209000, 250000, 167000};
+    const int64_t expected[] = {0, 42000, 83000, 125000, 167000, 209000, 250000};
+    for (unsigned i = 0; i < sizeof(order)/sizeof(*order); ++i) {
+        p->pts = p->dts = order[i];
+        assert(dvbridge_fel_submit(f, p));
+        if (i == 2) {
+            assert(dvbridge_fel_take(f, 0, &frame) == 1 && frame->pts == 0);
+            av_frame_free(&frame);
+            assert(dvbridge_fel_take(f, 42000, &frame) == 0 && !frame);
+        }
+    }
+    for (unsigned i = 1; i < sizeof(expected)/sizeof(*expected); ++i) {
+        assert(dvbridge_fel_take(f, expected[i], &frame) == 1);
+        assert(frame->pts == expected[i]);
+        av_frame_free(&frame);
+    }
+    reorder = false;
+    dvbridge_fel_reset(f);
     p->pts = p->dts = 0;
     assert(dvbridge_fel_submit(f, p));
     assert(dvbridge_fel_take(f, 0, &frame) == 1);
@@ -109,6 +137,16 @@ int main(void)
     assert(!dvbridge_fel_submit(f, p) && dvbridge_fel_failed(f));
     bad_pts = false;
     dvbridge_fel_reset(f);
+    assert(dvbridge_fel_submit(f, p));
+    assert(!dvbridge_fel_submit(f, p) && dvbridge_fel_failed(f)); /* duplicate identity */
+    dvbridge_fel_reset(f);
+    for (int i = 1; i <= 32; ++i) {
+        p->pts = p->dts = i * 41708;
+        assert(dvbridge_fel_submit(f, p));
+    }
+    assert(dvbridge_fel_take(f, 0, &frame) == -1 && !frame); /* bounded missing-pair wait */
+    dvbridge_fel_reset(f);
+    p->pts = p->dts = 0;
     send_error = true;
     assert(!dvbridge_fel_submit(f, p) && dvbridge_fel_failed(f));
     send_error = false;

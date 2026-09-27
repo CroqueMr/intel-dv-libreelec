@@ -4,6 +4,14 @@ This index describes the actual exported patches, not an upstream fork history.
 Apply patches in filename order within each component. The Kodi patch includes
 the shared renderer; its internal files are listed individually below.
 
+### FEL presentation pairing
+
+`kodi-9993-fel-presentation-pairing.patch` fixes playback stalls when the
+enhancement decoder returns frames in a different timestamp order. It preserves
+valid presentation timestamps instead of replacing them with FFmpeg estimates,
+and searches a bounded queue for the exact matching frame. It does not change
+DV metadata, pixel processing, GPU rendering or non-DV playback.
+
 ## linux
 
 Diagnostic addition: `linux-9902-dv-diagnostics.patch` logs the evaluated DV link
