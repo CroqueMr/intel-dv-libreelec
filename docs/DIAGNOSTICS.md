@@ -22,6 +22,20 @@ windowing logging can be much noisier and is not required for a first report.
 
 ## Collect the evidence
 
+### Native on-screen playback information
+
+During playback, **O** opens Kodi's player-process information; **Ctrl+Shift+O**
+opens its debug counters, and **Alt+O** opens video-debug information. **I** is
+the ordinary media-information action, not the decoder or dropped-frame view.
+Loose test files may have little library information to display.
+
+The native HDR detail reports the source profile and adds FEL, CM2.9/CM4 and
+HDMI DV only from the successfully presented DV path. The TV badge alone does
+not verify enhancement-layer reconstruction. Stopping playback clears the
+active output status; the selected file may retain its source-profile label.
+
+### Log collection
+
 Over SSH, run:
 
 ```sh

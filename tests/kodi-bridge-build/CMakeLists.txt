@@ -41,6 +41,12 @@ target_link_options(fel_queue PRIVATE
   -Wl,--wrap=avcodec_receive_frame -Wl,--wrap=avcodec_flush_buffers
   -Wl,--wrap=av_parser_parse2)
 add_test(NAME fel_queue COMMAND fel_queue)
+pkg_check_modules(DVFormat REQUIRED IMPORTED_TARGET libavformat)
+add_executable(fel_seek ../fel_seek.c)
+target_link_libraries(fel_seek PRIVATE dvbridge_core PkgConfig::DVFormat)
+target_link_options(fel_seek PRIVATE -Wl,--wrap=av_seek_frame -Wl,--wrap=av_read_frame
+                                    -Wl,--wrap=av_parser_parse2)
+add_test(NAME fel_seek COMMAND fel_seek)
 pkg_check_modules(DVGbm REQUIRED IMPORTED_TARGET gbm)
 pkg_check_modules(DVDrm REQUIRED IMPORTED_TARGET libdrm)
 add_library(drm_state_compile OBJECT "${DVBRIDGE_KODI_SOURCE}/xbmc/windowing/gbm/drm/DVBridgeState.cpp"

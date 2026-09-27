@@ -79,9 +79,28 @@ int main(void)
     dvbridge_fel_reset(f); parse_error=true; assert(!submit(f,0,0,0,true,true)); parse_error=false;
     dvbridge_fel_reset(f); send_error=true; assert(!submit(f,0,0,0,true,true)); send_error=false;
     dvbridge_fel_reset(f);
-    for (unsigned i=0;i<32;i++) assert(submit(f,i*41708,i,63,i==0,false));
-    assert(!submit(f,32*41708,32,63,false,false));
-    dvbridge_fel_reset(f); assert(submit(f,0,0,1,true,false)); assert(!dvbridge_fel_drain(f));
+    assert(submit(f,0,0,0,true,true)); take(f,0);
+    for (unsigned i=1;i<=32;i++) assert(submit(f,i*41708,i,63,false,false));
+    assert(!submit(f,33*41708,33,63,false,false));
+    /* A BL recovery point need not be an EL random-access point. */
+    dvbridge_fel_reset(f); assert(submit(f,1000000,20,7,true,false));
+    assert(dvbridge_fel_take(f,1000000,&frame)==2 && !frame);
+    assert(submit(f,1042000,21,0,false,true)); take(f,1042000);
+    assert(dvbridge_fel_take(f,1000000,&frame)==2 && !frame);
+    assert(submit(f,1083000,22,1,false,false)); take(f,1083000);
+    /* Both layers can instead share a non-zero CRA picture identity. */
+    dvbridge_fel_reset(f); assert(submit(f,2000000,42,42,true,true)); take(f,2000000);
+    assert(submit(f,2042000,43,43,false,false)); take(f,2042000);
+    /* Neither EOF nor unlimited preroll may hide a missing recovery point. */
+    dvbridge_fel_reset(f);
+    assert(submit(f,0,20,7,true,false));
+    assert(!dvbridge_fel_drain(f) && dvbridge_fel_failed(f));
+    assert(dvbridge_fel_take(f,0,&frame)==-1 && !frame);
+    dvbridge_fel_reset(f);
+    for (unsigned i=0;i<1024;i++)
+        assert(submit(f,i*41708,20,7,false,false));
+    assert(!submit(f,1024*41708,20,7,false,false));
+    assert(dvbridge_fel_failed(f));
     dvbridge_fel_destroy(f); av_buffer_unref(&device);
     puts("PASS: HEVC picture mapping, independent IDR, ownership, reset, bounded lookahead and errors");
 }

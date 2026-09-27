@@ -272,11 +272,14 @@
   },
   "patches/kodi/kodi-9993-fel-presentation-pairing.patch": {
     "component": "kodi",
-    "summary": "Pair independently coded FEL layers by HEVC picture order",
+    "summary": "Pair FEL pictures and recover both layers after seeks",
     "files": {
       "tools/dvbridge/dvbridge_fel.c": "Use FFmpeg HEVC picture-order parsing and bounded timestamp mapping before enhancement decode.",
-      "tools/dvbridge/dvbridge_fel.h": "Expose explicit enhancement EOF state without substituting missing pictures.",
-      "xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.cpp": "End an exhausted enhancement stream cleanly with a native Kodi diagnostic warning."
+      "tools/dvbridge/dvbridge_fel.h": "Distinguish preroll, missing pictures and enhancement EOF without substitution.",
+      "tools/dvbridge/dvbridge_fel_seek.h": "Find bounded dual-layer random-access preroll using FFmpeg parsers, without decoding pixels.",
+      "xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp": "Preserve the requested seek position while feeding native DV decoder preroll; leave non-DV seeks unchanged.",
+      "xbmc/cores/VideoPlayer/DVDDemuxers/CMakeLists.txt": "Add the private DV helper include path only when the bridge is built.",
+      "xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.cpp": "Discard pre-anchor pictures and handle exhausted enhancement streams through the native player."
     }
   }
 }

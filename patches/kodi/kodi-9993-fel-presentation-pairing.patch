@@ -49,7 +49,7 @@
  
  struct dvbridge_fel {
      AVBSFContext *split;
-@@ -18,6 +53,10 @@
+@@ -18,6 +53,13 @@
      unsigned num_packets, num_frames;
      size_t packet_bytes;
      bool opened, failed, draining, sent_eof, eof;
@@ -57,10 +57,13 @@
 +    int64_t packet_order[QUEUE_MAX];
 +    struct { int64_t order, pts; } times[MAP_MAX];
 +    unsigned num_times;
++    bool synchronizing;
++    int64_t anchor_pts;
++    unsigned preroll_packets;
  };
  
  static enum AVPixelFormat hardware_format(AVCodecContext *ctx, const enum AVPixelFormat *formats)
-@@ -41,10 +80,8 @@
+@@ -41,10 +83,8 @@
      return AV_PIX_FMT_VAAPI;
  }
  
@@ -73,7 +76,7 @@
      for (unsigned i = 0; i < f->num_packets; ++i)
          av_packet_free(&f->packets[i]);
      for (unsigned i = 0; i < f->num_frames; ++i)
-@@ -52,6 +89,26 @@
+@@ -52,6 +92,29 @@
      f->num_packets = f->num_frames = 0;
      f->packet_bytes = 0;
      f->failed = f->draining = f->sent_eof = f->eof = false;
@@ -85,6 +88,9 @@
 +    if (!f)
 +        return;
 +    clear_queues(f);
++    f->synchronizing = true;
++    f->anchor_pts = AV_NOPTS_VALUE;
++    f->preroll_packets = 0;
 +    struct picture_order *orders[] = {&f->base_order, &f->enhancement_order};
 +    for (unsigned i = 0; i < 2; ++i) {
 +        struct picture_order *order = orders[i];
@@ -100,7 +106,7 @@
      if (f->split)
          av_bsf_flush(f->split);
      if (f->opened)
-@@ -62,7 +119,11 @@
+@@ -62,7 +125,11 @@
  {
      if (!f)
          return;
@@ -113,7 +119,7 @@
      avcodec_free_context(&f->decoder);
      av_bsf_free(&f->split);
      free(f);
-@@ -72,18 +133,17 @@
+@@ -72,18 +139,19 @@
  {
      if (!p || p->codec_id != AV_CODEC_ID_HEVC || time_base.num <= 0 || time_base.den <= 0)
          return NULL;
@@ -126,6 +132,8 @@
      if (!f)
          return NULL;
 -    if (av_bsf_alloc(split, &f->split) < 0 ||
++    f->synchronizing = true;
++    f->anchor_pts = AV_NOPTS_VALUE;
 +    if (av_bsf_list_parse_str("dovi_split=mode=el", &f->split) < 0 ||
          avcodec_parameters_copy(f->split->par_in, p) < 0)
          goto fail;
@@ -135,7 +143,7 @@
          goto fail;
      f->decoder = avcodec_alloc_context3(codec);
      if (!f->decoder || avcodec_parameters_to_context(f->decoder, f->split->par_out) < 0)
-@@ -91,6 +151,16 @@
+@@ -91,6 +159,16 @@
      f->decoder->pkt_timebase = time_base;
      f->decoder->get_format = hardware_format;
      f->decoder->thread_count = 1;
@@ -152,7 +160,7 @@
      return f;
  fail:
      dvbridge_fel_destroy(f);
-@@ -110,11 +180,19 @@
+@@ -110,11 +188,19 @@
                  f->eof = true;
              return result == AVERROR(EAGAIN) || result == AVERROR_EOF;
          }
@@ -175,7 +183,7 @@
          }
          f->frames[f->num_frames++] = frame;
      }
-@@ -131,15 +209,29 @@
+@@ -131,15 +217,29 @@
          goto fail;
      while (f->num_packets && f->num_frames < QUEUE_MAX) {
          AVPacket *packet = f->packets[0];
@@ -205,7 +213,7 @@
          if (!receive_frames(f))
              goto fail;
      }
-@@ -174,11 +266,20 @@
+@@ -174,11 +274,20 @@
      return pump(f);
  }
  
@@ -226,7 +234,7 @@
      AVPacket *copy = av_packet_clone(packet);
      if (!copy)
          goto fail;
-@@ -198,7 +299,8 @@
+@@ -198,9 +307,32 @@
              goto fail;
          }
          if (f->num_packets == QUEUE_MAX || copy->size <= 0 ||
@@ -235,8 +243,43 @@
 +            !picture_identity(&f->enhancement_order, copy, &f->packet_order[f->num_packets])) {
              av_packet_free(&copy);
              goto fail;
++        }
++        if (f->synchronizing) {
++            const AVCodecParserContext *bp = f->base_order.parser;
++            const AVCodecParserContext *ep = f->enhancement_order.parser;
++            bool common_key = bp->key_frame == 1 && ep->key_frame == 1 &&
++                              bp->output_picture_number == ep->output_picture_number;
++            /* A non-reordered BL gives the IDR packet an unambiguous display
++             * time. Never use this shortcut for a BL with reordered pictures. */
++            bool el_idr = ep->key_frame == 1 && ep->output_picture_number == 0 &&
++                          f->base_order.context->has_b_frames == 0;
++            if (!common_key && !el_idr) {
++                av_packet_free(&copy);
++                f->num_times = 0;
++                if (++f->preroll_packets > 1024)
++                    goto fail;
++                continue;
++            }
++            f->enhancement_order.offset = base_identity - ep->output_picture_number;
++            f->enhancement_order.maximum = base_identity;
++            f->packet_order[f->num_packets] = base_identity;
++            f->anchor_pts = packet->pts;
++            f->synchronizing = false;
          }
-@@ -222,22 +324,32 @@
+         f->packet_bytes += copy->size;
+         f->packets[f->num_packets++] = copy;
+@@ -214,6 +346,10 @@
+ {
+     if (!f)
+         return false;
++    if (f->synchronizing) {
++        f->failed = true;
++        return false; /* EOF cannot supply the missing random-access picture. */
++    }
+     f->draining = true;
+     return pump(f);
+ }
+@@ -222,22 +358,34 @@
  {
      if (!f || !frame || *frame || pts == AV_NOPTS_VALUE || !pump(f))
          return -1;
@@ -244,6 +287,8 @@
 -        AVFrame *candidate = f->frames[0];
 -        if (candidate->pts > pts)
 -            return -1;
++    if (f->synchronizing || (f->anchor_pts != AV_NOPTS_VALUE && pts < f->anchor_pts))
++        return 2; /* Preroll before a recoverable EL picture, not a substitute. */
 +    for (unsigned i = 0; i < f->num_frames;) {
 +        AVFrame *candidate = f->frames[i];
 +        if (candidate->pts > pts) {
@@ -277,18 +322,177 @@
 +}
 --- a/tools/dvbridge/dvbridge_fel.h
 +++ b/tools/dvbridge/dvbridge_fel.h
-@@ -15,4 +15,6 @@
- /* 1: exact pair, 0: more input required, -1: missing pair / decoder failure. */
+@@ -12,7 +12,9 @@
+ bool dvbridge_fel_device(struct dvbridge_fel *fel, AVBufferRef *device);
+ bool dvbridge_fel_submit(struct dvbridge_fel *fel, const AVPacket *packet);
+ bool dvbridge_fel_drain(struct dvbridge_fel *fel);
+-/* 1: exact pair, 0: more input required, -1: missing pair / decoder failure. */
++/* 1: exact pair, 0: need input, 2: discard preroll, -1: missing pair / failure. */
  int dvbridge_fel_take(struct dvbridge_fel *fel, int64_t pts, AVFrame **frame);
  bool dvbridge_fel_failed(const struct dvbridge_fel *fel);
 +/* Decoder reached EOF and no enhancement surface remains to pair. */
 +bool dvbridge_fel_exhausted(const struct dvbridge_fel *fel);
  #endif
+--- /dev/null
++++ b/tools/dvbridge/dvbridge_fel_seek.h
+@@ -0,0 +1,83 @@
++/* SPDX-License-Identifier: GPL-3.0-or-later */
++#ifndef DVBRIDGE_FEL_SEEK_H
++#define DVBRIDGE_FEL_SEEK_H
++#include <libavformat/avformat.h>
++#include <libavcodec/bsf.h>
++#include <libavutil/time.h>
++#include <limits.h>
++#include <stdbool.h>
++
++/* Header-only bounded random-access probe. The caller must perform its final
++ * av_seek_frame after this probe, including on failure. No pixels are decoded.
++ * Target and result use the selected video stream's time base. */
++static int64_t dvbridge_fel_seek_point(AVFormatContext *format, int video, int64_t target)
++{
++    AVStream *stream = format->streams[video];
++    const int windows[] = {0, 2, 8, 32, 128};
++    int64_t deadline = av_gettime_relative() + 3000000;
++    size_t bytes = 0;
++    int64_t found = AV_NOPTS_VALUE;
++    const AVRational seconds = {1,1};
++    for (unsigned attempt = 0; attempt < sizeof(windows)/sizeof(*windows); ++attempt) {
++        int64_t start = target - av_rescale_q(windows[attempt], seconds, stream->time_base);
++        if (stream->start_time != AV_NOPTS_VALUE && start < stream->start_time)
++            start = stream->start_time;
++        if (av_seek_frame(format, video, start, AVSEEK_FLAG_BACKWARD) < 0)
++            break;
++        AVBSFContext *split = NULL;
++        AVCodecParserContext *bp = av_parser_init(AV_CODEC_ID_HEVC);
++        AVCodecParserContext *ep = av_parser_init(AV_CODEC_ID_HEVC);
++        AVCodecContext *bc = avcodec_alloc_context3(NULL), *ec = avcodec_alloc_context3(NULL);
++        AVPacket *packet = av_packet_alloc(), *el = av_packet_alloc();
++        int64_t base_key = AV_NOPTS_VALUE;
++        if (!bp || !ep || !bc || !ec || !packet || !el ||
++            av_bsf_list_parse_str("dovi_split=mode=el", &split) < 0 ||
++            avcodec_parameters_copy(split->par_in, stream->codecpar) < 0)
++            goto cleanup;
++        split->time_base_in = stream->time_base;
++        if (av_bsf_init(split) < 0 ||
++            avcodec_parameters_to_context(bc, stream->codecpar) < 0 ||
++            avcodec_parameters_to_context(ec, split->par_out) < 0)
++            goto cleanup;
++        bp->flags = ep->flags = PARSER_FLAG_COMPLETE_FRAMES;
++        for (unsigned count = 0; count < 12000 && bytes < 256u*1024u*1024u &&
++             av_gettime_relative() < deadline; ++count) {
++            if (av_read_frame(format, packet) < 0)
++                break;
++            bytes += packet->size > 0 ? packet->size : 0;
++            if (packet->stream_index != video) { av_packet_unref(packet); continue; }
++            int64_t pts = packet->pts;
++            if (pts == AV_NOPTS_VALUE) { av_packet_unref(packet); break; }
++            if (pts > target) { av_packet_unref(packet); break; }
++            uint8_t *out; int size;
++            bp->output_picture_number = INT_MIN;
++            if (av_parser_parse2(bp,bc,&out,&size,packet->data,packet->size,
++                                 pts,packet->dts,packet->pos) != packet->size ||
++                !size || bp->output_picture_number == INT_MIN)
++                break;
++            if (bp->key_frame == 1) base_key = pts;
++            if (av_bsf_send_packet(split, packet) < 0) break;
++            while (av_bsf_receive_packet(split, el) >= 0) {
++                ep->output_picture_number = INT_MIN;
++                int used = av_parser_parse2(ep,ec,&out,&size,el->data,el->size,pts,el->dts,el->pos);
++                bool common = bp->key_frame == 1 && ep->key_frame == 1 &&
++                              bp->output_picture_number == ep->output_picture_number;
++                bool idr = stream->codecpar->video_delay == 0 && ep->key_frame == 1 &&
++                           ep->output_picture_number == 0;
++                if (used == el->size && size > 0 && base_key != AV_NOPTS_VALUE && (common || idr))
++                    found = base_key;
++                av_packet_unref(el);
++            }
++            av_packet_unref(packet);
++            if (windows[attempt] == 0 || pts == target) break;
++        }
++cleanup:
++        av_packet_free(&packet); av_packet_free(&el);
++        av_parser_close(bp); av_parser_close(ep);
++        avcodec_free_context(&bc); avcodec_free_context(&ec); av_bsf_free(&split);
++        if (found != AV_NOPTS_VALUE || av_gettime_relative() >= deadline || bytes >= 256u*1024u*1024u)
++            break;
++    }
++    return found;
++}
++#endif
+--- a/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp
++++ b/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp
+@@ -9,6 +9,14 @@
+ #include "DVDDemuxFFmpeg.h"
+ 
+ #include "DVDDemuxUtils.h"
++#ifdef HAVE_DVBRIDGE
++#include "cores/VideoPlayer/DVDStreamInfo.h"
++#include "cores/VideoPlayer/DVDCodecs/Video/DVPlaybackPolicy.h"
++extern "C"
++{
++#include "dvbridge_fel_seek.h"
++}
++#endif
+ #include "DVDInputStreams/DVDInputStream.h"
+ #ifdef HAVE_LIBBLURAY
+ #include "DVDInputStreams/DVDInputStreamBluray.h"
+@@ -1349,6 +1357,36 @@
+   int ret;
+   {
+     std::unique_lock lock(m_critSection);
++#ifdef HAVE_DVBRIDGE
++    // Only the native dual-layer DV path needs enhancement preroll. Keep the
++    // requested startpts below unchanged so Kodi discards preroll normally.
++    if (!m_checkTransportStream && m_seekStream == -1)
++    {
++      for (const auto& [id, stream] : m_streams)
++      {
++        if (stream->type != StreamType::VIDEO || id < 0 ||
++            static_cast<unsigned>(id) >= m_pFormatContext->nb_streams)
++          continue;
++        CDVDStreamInfo hints(*stream);
++        if (hints.dovi.dv_profile != 7 || !hints.dovi.el_present_flag ||
++            !DVBRIDGE::WantsNativeOutput(hints))
++          continue;
++        AVStream* video = m_pFormatContext->streams[id];
++        const int64_t target = av_rescale_q(seek_pts, AV_TIME_BASE_Q, video->time_base);
++        const int64_t anchor = dvbridge_fel_seek_point(m_pFormatContext, id, target);
++        if (anchor != AV_NOPTS_VALUE)
++        {
++          seek_pts = av_rescale_q(anchor, video->time_base, AV_TIME_BASE_Q);
++          backwards = true;
++          CLog::Log(LOGDEBUG, "DV FEL: random-access preroll begins at {} us for {} ms seek",
++                    seek_pts, time);
++        }
++        else
++          CLog::Log(LOGWARNING, "DV FEL: no common random-access point in bounded seek probe");
++        break;
++      }
++    }
++#endif
+     ret = av_seek_frame(m_pFormatContext, m_seekStream, seek_pts, backwards ? AVSEEK_FLAG_BACKWARD : 0);
+ 
+     if (ret < 0)
+--- a/xbmc/cores/VideoPlayer/DVDDemuxers/CMakeLists.txt
++++ b/xbmc/cores/VideoPlayer/DVDDemuxers/CMakeLists.txt
+@@ -34,3 +34,6 @@
+             DVDFactoryDemuxer.h)
+ 
+ core_add_library(dvddemuxers)
++if(ENABLE_DVBRIDGE)
++  target_include_directories(dvddemuxers PRIVATE ${CMAKE_SOURCE_DIR}/tools/dvbridge)
++endif()
 --- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.cpp
 +++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.cpp
-@@ -720,7 +720,17 @@
+@@ -719,8 +719,23 @@
+       AVFrame* enhancement = nullptr;
        int result = dvbridge_fel_take(m_dvFel.get(), base->doviSourcePts,
                                       &enhancement);
++      if (result == 2)
++      {
++        m_dvPending.pop_front();
++        return VC_BUFFER;
++      }
        if (result < 0)
 +      {
 +        if (dvbridge_fel_exhausted(m_dvFel.get()))
