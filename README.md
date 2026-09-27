@@ -5,7 +5,7 @@ Native Dolby Vision playback in Kodi on compatible Intel HDMI systems.
 An independent **LibreELEC Generic x86_64 community build**, using Kodi's own
 VideoPlayer, VAAPI decoder and GBM/GLES display path. **No external player, or proprietary Dolby SDK is required.**
 
-**Release candidate: 0.1.0-rc1-opt1-diag1.** Built on LibreELEC 13 development sources and
+**Release candidate: R0.1.0-rc2-opt1.** Built on LibreELEC 13 development sources and
 Kodi 22 Beta 2, not on a stable LibreELEC release. Not affiliated with or
 certified by LibreELEC, Kodi, Dolby or Intel. Report this build's issues here,
 not to upstream projects unless reproduced with their unmodified releases.
@@ -77,8 +77,10 @@ displays are outside the supported DV route. See [hardware requirements](docs/HA
 
 ## Get started
 
-**[Download the installation image](https://github.com/CroqueMr/intel-dv-libreelec/releases/download/v0.1.0-rc1-opt1-diag1/LibreELEC-Generic.x86_64-13.0-intel-dv-0.1.0-rc1-opt1-diag1.img.gz)**
-or **[download the manual update](https://github.com/CroqueMr/intel-dv-libreelec/releases/download/v0.1.0-rc1-opt1-diag1/LibreELEC-Generic.x86_64-13.0-intel-dv-0.1.0-rc1-opt1-diag1.tar)**.
+**[Download the installation image](https://github.com/CroqueMr/intel-dv-libreelec/releases/download/R0.1.0-rc2-opt1/LibreELEC-Generic.x86_64-13.0-intel-dv-0.1.0-rc1-opt1-diag1.img.gz)**
+or **[download the manual update](https://github.com/CroqueMr/intel-dv-libreelec/releases/download/R0.1.0-rc2-opt1/LibreELEC-Generic.x86_64-13.0-intel-dv-0.1.0-rc1-opt1-diag1.tar)**.
+
+The release keeps the tested `0.1.0-rc1-opt1-diag1` build identifier and files unchanged.
 Only one is needed.
 The larger [complete source bundle](docs/SOURCE-BUNDLE.md) is for developers and
 redistribution, not installation.
