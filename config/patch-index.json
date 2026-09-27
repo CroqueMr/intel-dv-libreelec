@@ -272,9 +272,11 @@
   },
   "patches/kodi/kodi-9993-fel-presentation-pairing.patch": {
     "component": "kodi",
-    "summary": "Preserve exact FEL frame timestamps and handle reordered enhancement output",
+    "summary": "Pair independently coded FEL layers by HEVC picture order",
     "files": {
-      "tools/dvbridge/dvbridge_fel.c": "Match decoded enhancement frames by their original presentation timestamps with bounded lookahead; do not substitute nearby frames."
+      "tools/dvbridge/dvbridge_fel.c": "Use FFmpeg HEVC picture-order parsing and bounded timestamp mapping before enhancement decode.",
+      "tools/dvbridge/dvbridge_fel.h": "Expose explicit enhancement EOF state without substituting missing pictures.",
+      "xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.cpp": "End an exhausted enhancement stream cleanly with a native Kodi diagnostic warning."
     }
   }
 }

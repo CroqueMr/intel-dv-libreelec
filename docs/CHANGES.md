@@ -6,11 +6,18 @@ the shared renderer; its internal files are listed individually below.
 
 ### FEL presentation pairing
 
-`kodi-9993-fel-presentation-pairing.patch` fixes playback stalls when the
-enhancement decoder returns frames in a different timestamp order. It preserves
-valid presentation timestamps instead of replacing them with FFmpeg estimates,
-and searches a bounded queue for the exact matching frame. It does not change
-DV metadata, pixel processing, GPU rendering or non-DV playback.
+`kodi-9993-fel-presentation-pairing.patch` fixes stalls and back-and-forth motion
+when FEL and base-layer pictures use different coding orders. FFmpeg's HEVC
+parser identifies the corresponding pictures before hardware decoding, with
+bounded lookahead and no nearest-frame substitution. Enhancement EOF is reported
+in Kodi's log and ends playback cleanly when a file has unmatched trailing base
+pictures. DV metadata, pixel processing, GPU rendering and non-DV playback are
+unchanged.
+
+Private candidate limitation: seeking within the synthetic independently coded
+"Woman at 80s" sample can stall after the seek. Start-to-end picture-order
+validation must not be interpreted as seek validation. This candidate is not
+ready for public release until that regression is resolved.
 
 ## linux
 

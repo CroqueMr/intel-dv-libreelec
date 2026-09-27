@@ -38,7 +38,8 @@ add_executable(fel_queue ../fel_queue.c)
 target_link_libraries(fel_queue PRIVATE dvbridge_core)
 target_link_options(fel_queue PRIVATE
   -Wl,--wrap=avcodec_open2 -Wl,--wrap=avcodec_send_packet
-  -Wl,--wrap=avcodec_receive_frame -Wl,--wrap=avcodec_flush_buffers)
+  -Wl,--wrap=avcodec_receive_frame -Wl,--wrap=avcodec_flush_buffers
+  -Wl,--wrap=av_parser_parse2)
 add_test(NAME fel_queue COMMAND fel_queue)
 pkg_check_modules(DVGbm REQUIRED IMPORTED_TARGET gbm)
 pkg_check_modules(DVDrm REQUIRED IMPORTED_TARGET libdrm)
