@@ -4,7 +4,8 @@ body:
   - type: input
     id: release
     attributes:
-      label: Release and image SHA-256
+      label: Release version
+      placeholder: e.g. R0.1.0-rc2-opt1
     validations:
       required: true
   - type: textarea
