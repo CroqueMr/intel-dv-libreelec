@@ -29,6 +29,8 @@ def apply(bundle, tree):
     for source, destination in validated:
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source, destination)
+        if destination.relative_to(tree).as_posix() in manifest.get('executables', []):
+            destination.chmod(0o755)
     shutil.copyfile(manifest_path, tree / 'dvbridge-overlay.json')
     print(f'Applied {len(validated)} checked files. No build or installation was started.')
 

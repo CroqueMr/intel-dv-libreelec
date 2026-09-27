@@ -240,5 +240,25 @@
       "tools/dvbridge/pack_gles300.frag": "Pack reconstructed video and metadata into the Standard-DV RGB8 transport.",
       "tools/dvbridge/pack_gles300.vert": "Generate full-screen transport geometry with the required orientation."
     }
+  },
+  "patches/kodi/kodi-9991-diagnostics.patch": {
+    "component": "kodi",
+    "summary": "Report bounded output and render failures with optional native Kodi debug detail",
+    "files": {
+      "xbmc/utils/DVBridgeDiagnosticState.h": "Add diagnostics only; preserve rendering and output decisions.",
+      "xbmc/cores/VideoPlayer/VideoRenderers/DVBridgeGLES.cpp": "Add diagnostics only; preserve rendering and output decisions.",
+      "xbmc/cores/VideoPlayer/VideoRenderers/DVBridgeGLES.h": "Add diagnostics only; preserve rendering and output decisions.",
+      "xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp": "Add diagnostics only; preserve rendering and output decisions.",
+      "xbmc/windowing/gbm/drm/DRMAtomic.cpp": "Add diagnostics only; preserve rendering and output decisions.",
+      "xbmc/windowing/gbm/drm/DRMAtomic.h": "Add diagnostics only; preserve rendering and output decisions.",
+      "xbmc/windowing/gbm/drm/DVBridgeState.cpp": "Add diagnostics only; preserve rendering and output decisions."
+    }
+  },
+  "patches/linux/linux-9902-dv-diagnostics.patch": {
+    "component": "linux",
+    "summary": "Explain rejected Intel DV link policy without changing eligibility",
+    "files": {
+      "drivers/gpu/drm/i915/display/intel_hdmi.c": "Add diagnostics only; preserve rendering and output decisions."
+    }
   }
 }

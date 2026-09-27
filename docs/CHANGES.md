@@ -6,6 +6,9 @@ the shared renderer; its internal files are listed individually below.
 
 ## linux
 
+Diagnostic addition: `linux-9902-dv-diagnostics.patch` logs the evaluated DV link
+flags from `intel_hdmi.c` on a rate-limited rejection, without changing policy.
+
 | Patch | Purpose |
 | --- | --- |
 | [linux-9900-00-drivers__gpu__drm__i915__display__intel_atomic.c.patch](../patches/linux/linux-9900-00-drivers__gpu__drm__i915__display__intel_atomic.c.patch) | Expose the validated Dolby Vision connector control. |
@@ -72,6 +75,13 @@ the shared renderer; its internal files are listed individually below.
 | `src/shaders/sampling.c` | Fetch aligned Lanczos3 taps directly; keep linear sampling for other filters and unaligned geometry. |
 
 ## kodi
+
+Diagnostic addition: `kodi-9991-diagnostics.patch` adds bounded error summaries in
+`DRMAtomic.cpp`, optional property capture logs in `DVBridgeState.cpp`, stream and
+restoration logs in `WinSystemGbmGLESContext.cpp`, and renderer-stage diagnostics
+in `DVBridgeGLES.cpp`. Their headers carry the diagnostic-only counters.
+`utils/DVBridgeDiagnosticState.h` implements the independently tested rate limiter.
+The shared shaders, metadata helpers and playback decisions are unchanged.
 
 | Patch | Purpose |
 | --- | --- |

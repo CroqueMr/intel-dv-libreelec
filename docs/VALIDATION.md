@@ -94,6 +94,20 @@ not mean the previously published rc1 image contains these unreleased changes.
 
 ## Image checks
 
+### Opt1 diagnostics revision
+
+The diagnostic revision was rebuilt through the native LibreELEC image pipeline,
+including Linux and Kodi. All 26 patches apply without fuzz to the pinned sources.
+All 30 Python source/regression tests pass. The 15 C/C++ host tests pass with AddressSanitizer and UndefinedBehaviorSanitizer
+(leak detection disabled for the GL host suite), including failure-log throttling.
+The image dependency/configuration audit also passes.
+
+A disposable, network-isolated QEMU boot reached `multi-user.target`, confirmed
+from its framebuffer capture. Serial output was not available; the observation
+ended at 60 seconds with time synchronization still waiting, as expected without
+network access. This is a boot smoke test, not a Kodi playback or HDMI test.
+This diagnostic-only revision has not been requalified on physical HDMI hardware.
+
 ```sh
 python3 tools/audit-image.py --tree /path/to/LibreELEC-DV \
   --image /path/to/LibreELEC-DV/target/selected-image.img.gz \

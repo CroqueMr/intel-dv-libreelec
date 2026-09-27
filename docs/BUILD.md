@@ -16,8 +16,8 @@ git -C LibreELEC-DV checkout --detach 3de4708704041ead8ae1531092efb7ea5da9d355
 python3 intel-dv-libreelec/tools/apply-overlay.py LibreELEC-DV
 cd LibreELEC-DV
 PROJECT=Generic ARCH=x86_64 OFFICIAL=no \
-  BUILDER_NAME=Intel-DV CUSTOM_VERSION=13.0-intel-dv-0.1.0-rc1 \
-  CUSTOM_IMAGE_NAME=LibreELEC-Generic.x86_64-13.0-intel-dv-0.1.0-rc1 make image
+  BUILDER_NAME=Intel-DV CUSTOM_VERSION=13.0-intel-dv-0.1.0-rc1-opt1-diag1 \
+  CUSTOM_IMAGE_NAME=LibreELEC-Generic.x86_64-13.0-intel-dv-0.1.0-rc1-opt1-diag1 make image
 ```
 
 The installer validates every overlay file before writing anything, checks the

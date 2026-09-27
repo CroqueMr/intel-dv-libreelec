@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.0-rc1-opt1-diag1
+
+- Add optional DV startup/render/output diagnostics using Kodi's existing debug switch.
+- Explain Intel HDMI policy rejection with evaluated flags in the kernel log.
+- Rate-limit repeated DV errors and add a local `dv-diagnostics collect` command.
+- Retain Opt1 optimizations; no change to rendering, metadata or HDMI eligibility.
+- Diagnostic revision, not a fix for unsupported HDMI routes or repeated retry behavior.
+
 ## 0.1.0-rc1-opt1
 
 - Avoid unnecessary reconstruction outside the Dolby Vision active picture,

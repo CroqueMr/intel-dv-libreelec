@@ -31,10 +31,13 @@
     "projects/Generic/patches/linux/linux-9900-07-drivers__gpu__drm__i915__display__intel_hdmi.c.patch": "fa76f455a4f1ca5d28590810bbf488963e90005c1f23d8d0704038dbd59a9d74",
     "projects/Generic/patches/linux/linux-9900-08-drivers__video__hdmi.c.patch": "6446b66d254ac934ce0dddd3b3fcd47c41b3af5c8f522579832294b753114a38",
     "projects/Generic/patches/linux/linux-9900-09-include__linux__hdmi.h.patch": "fc52a46f7745449a0bfd6fe499050c8147dfe32b59d8a3a6f3c08e8b87f7cd91",
-    "projects/Generic/patches/linux/linux-9901-native-hdmi-level-shifter.patch": "854df16b6a81c9fd4740e13feda867cf449fdcc730aea83adc1b46f871fbea6b"
+    "projects/Generic/patches/linux/linux-9901-native-hdmi-level-shifter.patch": "854df16b6a81c9fd4740e13feda867cf449fdcc730aea83adc1b46f871fbea6b",
+    "projects/Generic/patches/kodi/kodi-9991-diagnostics.patch": "23220df09da3a468a50f2d538f06fcd6d791e7159409d7ff3e96663b5fd1e153",
+    "projects/Generic/patches/linux/linux-9902-dv-diagnostics.patch": "1cddf58d4f3ba50ae2a7353c81a048a4cbe5fab2fb18ae783cf9ef3c871f234e",
+    "projects/Generic/filesystem/usr/bin/dv-diagnostics": "ee77b1f0c9a93a1ebd8680229b6b94b7cfcdd07b651e7eed07d38c6a3df2bdaf"
   },
   "schema": 2,
-  "release": "0.1.0-rc1",
+  "release": "0.1.0-rc1-opt1-diag1",
   "source_map": {
     "packages/addons/addon-depends/multimedia-tools-depends/libplacebo/patches/libplacebo-9910-6-centered-lanczos.patch": "patches/libplacebo/libplacebo-9910-6-centered-lanczos.patch",
     "packages/addons/addon-depends/multimedia-tools-depends/libplacebo/package.mk": "overlay/packages/addons/addon-depends/multimedia-tools-depends/libplacebo/package.mk",
@@ -61,7 +64,13 @@
     "projects/Generic/patches/linux/linux-9900-07-drivers__gpu__drm__i915__display__intel_hdmi.c.patch": "patches/linux/linux-9900-07-drivers__gpu__drm__i915__display__intel_hdmi.c.patch",
     "projects/Generic/patches/linux/linux-9900-08-drivers__video__hdmi.c.patch": "patches/linux/linux-9900-08-drivers__video__hdmi.c.patch",
     "projects/Generic/patches/linux/linux-9900-09-include__linux__hdmi.h.patch": "patches/linux/linux-9900-09-include__linux__hdmi.h.patch",
-    "projects/Generic/patches/linux/linux-9901-native-hdmi-level-shifter.patch": "patches/linux/linux-9901-native-hdmi-level-shifter.patch"
+    "projects/Generic/patches/linux/linux-9901-native-hdmi-level-shifter.patch": "patches/linux/linux-9901-native-hdmi-level-shifter.patch",
+    "projects/Generic/patches/kodi/kodi-9991-diagnostics.patch": "patches/kodi/kodi-9991-diagnostics.patch",
+    "projects/Generic/patches/linux/linux-9902-dv-diagnostics.patch": "patches/linux/linux-9902-dv-diagnostics.patch",
+    "projects/Generic/filesystem/usr/bin/dv-diagnostics": "overlay/projects/Generic/filesystem/usr/bin/dv-diagnostics"
   },
-  "evidence": "docs/VALIDATION.md"
+  "evidence": "docs/VALIDATION.md",
+  "executables": [
+    "projects/Generic/filesystem/usr/bin/dv-diagnostics"
+  ]
 }

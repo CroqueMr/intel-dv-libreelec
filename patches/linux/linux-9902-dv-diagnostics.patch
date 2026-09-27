@@ -1,0 +1,27 @@
+--- a/drivers/gpu/drm/i915/display/intel_hdmi.c
++++ b/drivers/gpu/drm/i915/display/intel_hdmi.c
+@@ -2514,8 +2514,23 @@
+ 		};
+ 
+ 		ret = intel_dv_lab_validate(&link);
+-		if (ret)
++		if (ret) {
++			/* Keep a useful cause even without DRM debug. Invalid clients may
++			 * submit this state every frame, so bound the kernel log rate.
++			 * These are diagnostics, not a relaxation of transport policy.
++			 */
++			drm_err_ratelimited(display->drm,
++				"DVBridge: link rejected errno=%d connector=%u enable=%d display_ver=%u edid_standard_v2=%d native_hdmi=%d lspcon=%d dual_mode=%d vbt_dual_mode=%d hdmi=%d rgb=%d limited=%d hdr_blob=%d cloned=%d progressive=%d requested_bpc=%u pipe_bpp=%u colorspace=%u mode=%ux%u@%u\n",
++				ret, connector->base.base.id, display->params.enable_dv_lab,
++				DISPLAY_VER(display), link.sink_standard_v2, link.native_hdmi,
++				enc_to_dig_port(encoder)->lspcon.active,
++				enc_to_intel_hdmi(encoder)->dp_dual_mode.type,
++				intel_bios_encoder_supports_dp_dual_mode(encoder->devdata),
++				link.hdmi, link.rgb, link.limited_range, link.hdr_blob,
++				link.cloned, link.progressive, link.requested_bpc, link.pipe_bpp,
++				link.colorspace, link.width, link.height, link.rounded_refresh);
+ 			return ret;
++		}
+ 		pipe_config->dither_force_disable = true;
+ 	}
+ 
