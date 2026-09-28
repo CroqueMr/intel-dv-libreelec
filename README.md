@@ -1,6 +1,6 @@
 # Intel Dolby Vision for LibreELEC
 
-Native Dolby Vision playback in Kodi on compatible Intel HDMI systems.
+Experimental Native Dolby Vision playback in Kodi on compatible Intel HDMI systems.
 
 An independent **LibreELEC Generic x86_64 community build**, using Kodi's own
 VideoPlayer, VAAPI decoder and GBM/GLES display path. **No external player, or proprietary Dolby SDK is required.**
