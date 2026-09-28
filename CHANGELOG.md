@@ -1,5 +1,14 @@
 # Changelog
 
+## R0.2.1a-opt1
+
+- **Lighter automatic diagnostics:** DV and relevant kernel details in the normal Kodi log, with bounded summaries instead of repeated output.
+- **Standard-DV compatibility:** aligned v0/v1/v2 display checks and matching HDMI signaling.
+- **HDMI recovery:** tolerate transient failures and pace persistent retries without permanently excluding a display.
+
+FEL fixes and opt1 optimizations are retained. No new rendering/OSD change.
+New HDMI routes remain subject to physical validation.
+
 ## R0.2.1-opt1
 
 - **Improved diagnostics:** relevant kernel Dolby Vision errors are now included in `kodi.log`, making playback issues easier to investigate.

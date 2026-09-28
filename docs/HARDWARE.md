@@ -10,8 +10,11 @@ sold with the same CPU.
    driver; the CPU marketing generation alone is not sufficient.
 2. Native HDMI, without active DisplayPort/LSPCON conversion. A native HDMI
    level shifter is not rejected merely for exposing a dual-mode identifier.
-3. A valid Dolby EDID v2 block advertising Standard DV. LLDV-only and older
-   EDID variants are not accepted by this release's policy.
+3. A valid Dolby EDID v0, v1 or v2 block advertising Standard DV. Both Kodi and
+   the driver use the same validation. V0 and applicable v1 sinks use legacy
+   Standard-DV HDMI signaling; modern sinks retain the Dolby-OUI packet.
+   LLDV-only, malformed and unsupported-version blocks remain ineligible.
+   The newly added v0/v1 routes have software coverage, not physical qualification.
 4. A supported progressive 3840 × 2160 display mode in Kodi, atomic GBM/GLES
    output and the required texture/rendering precision.
 5. Hardware decoding and import of the actual stream format. FEL additionally

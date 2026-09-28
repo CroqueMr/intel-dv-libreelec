@@ -26,21 +26,23 @@ The independently coded test sample now passes repeated seek and uninterrupted
 playback checks on the private fel3 image. See [VALIDATION.md](VALIDATION.md) for
 the exact scope; these checks do not qualify every possible stream.
 
-### New patches in R0.2.1-opt1
+### Changes in R0.2.1a-opt1
 
 | Patch | User-visible purpose | Scope |
 | --- | --- | --- |
-| `kodi-9992-kernel-log.patch` | Include relevant kernel DV rejection reasons in Kodi's log. | Diagnostic only; bounded background reads, deduplication, rate limiting and an independent disable switch. |
-| `kodi-9993-fel-presentation-pairing.patch` | Correct FEL picture order and restore accurate seeking in affected files. | Picture pairing and random access; no new shader, tone mapping, metadata format or kernel policy. |
+| `linux-9902-hdmi-compatibility.patch` | Match valid Standard-DV v0/v1/v2 display signaling. | Shared bounded EDID parser; legacy and modern VSIF use the same safety and transition guards. |
+| `kodi-9994-hdmi-recovery.patch` | Align player eligibility and pace persistent HDMI failures. | Independent retry state; immediate early retries, no permanent exclusion, restoration always attempted. |
+| `linux-9903-diagnostics.patch` | Preserve link and scanout rejection causes without a log flood. | Per-connector link budget and shared scanout-reason budget. |
+| `kodi-9995-diagnostics.patch` | Keep useful DV/kernel facts in the normal Kodi log. | Replaces 9991/9992 from a clean functional baseline; bounded automatic reports, no global debug requirement. |
 
-The release retains existing opt1 optimizations and earlier diagnostic patches.
-It adds no new FFmpeg, libplacebo or Linux patch compared with rc2-opt1.
+The release retains existing opt1 optimizations and the 9993 FEL correction.
+Old Kodi 9991/9992 and Linux 9902 diagnostic patches are removed. FFmpeg,
+libplacebo, shaders and common DV metadata/pixel-processing helpers are unchanged.
 For per-file details and removal boundaries, see [patches/README.md](../patches/README.md).
 
 ## linux
 
-Diagnostic addition: `linux-9902-dv-diagnostics.patch` logs the evaluated DV link
-flags from `intel_hdmi.c` on a rate-limited rejection, without changing policy.
+The new diagnostics are separate from sink compatibility and HDMI serialization.
 
 | Patch | Purpose |
 | --- | --- |
@@ -55,7 +57,8 @@ flags from `intel_hdmi.c` on a rate-limited rejection, without changing policy.
 | [linux-9900-08-drivers__video__hdmi.c.patch](../patches/linux/linux-9900-08-drivers__video__hdmi.c.patch) | Encode and validate Dolby Vision HDMI signaling. |
 | [linux-9900-09-include__linux__hdmi.h.patch](../patches/linux/linux-9900-09-include__linux__hdmi.h.patch) | Define shared Dolby Vision HDMI signaling structures. |
 | [linux-9901-native-hdmi-level-shifter.patch](../patches/linux/linux-9901-native-hdmi-level-shifter.patch) | Recognize native HDMI level shifters without allowing active DP conversion. |
-| [linux-9902-dv-diagnostics.patch](../patches/linux/linux-9902-dv-diagnostics.patch) | Explain rejected DV link configurations through rate-limited kernel diagnostics. |
+| [linux-9902-hdmi-compatibility.patch](../patches/linux/linux-9902-hdmi-compatibility.patch) | Share validated v0/v1/v2 sink capabilities and select matching HDMI signaling. |
+| [linux-9903-diagnostics.patch](../patches/linux/linux-9903-diagnostics.patch) | Retain bounded kernel rejection reasons without verbose DRM logging. |
 
 | Changed source file | High-level change |
 | --- | --- |
@@ -65,6 +68,7 @@ flags from `intel_hdmi.c` on a rate-limited rejection, without changing policy.
 | `drivers/gpu/drm/i915/display/intel_display_params.h` | Default the dedicated LE image to automatic capability detection. |
 | `drivers/gpu/drm/i915/display/intel_display_types.h` | Store DV property and transport state on the Intel connector. |
 | `drivers/gpu/drm/i915/display/intel_dv_lab_policy.h` | Validate EDID, modes and native-HDMI topology, including level shifters. |
+| `drivers/gpu/drm/i915/display/dvbridge_edid.h` | Validate complete EDIDs and Standard-DV versions using the same parser as Kodi. |
 | `drivers/gpu/drm/i915/display/intel_dvbridge_hdr_policy.h` | Retry eligible HDR10 links in deep-color 4:2:0 instead of losing precision to 8-bit RGB; exclude the DV tunnel. |
 | `drivers/gpu/drm/i915/display/intel_hdmi.c` | Connect hardware eligibility, HDMI timing, signaling and HDR precision policy. |
 | `drivers/video/hdmi.c` | Initialize, validate, pack and unpack the HDMI DV vendor information frame. |
@@ -110,19 +114,17 @@ flags from `intel_hdmi.c` on a rate-limited rejection, without changing policy.
 
 ## kodi
 
-Diagnostic addition: `kodi-9991-diagnostics.patch` adds bounded error summaries in
-`DRMAtomic.cpp`, optional property capture logs in `DVBridgeState.cpp`, stream and
-restoration logs in `WinSystemGbmGLESContext.cpp`, and renderer-stage diagnostics
-in `DVBridgeGLES.cpp`. Their headers carry the diagnostic-only counters.
-`utils/DVBridgeDiagnosticState.h` implements the independently tested rate limiter.
-The shared shaders, metadata helpers and playback decisions are unchanged.
+Kodi 9994 holds compatibility/retry changes. The independently removable 9995
+holds lightweight diagnostics; its counters never drive playback decisions.
+`DVBridgeState.cpp` has no added diagnostic changes. Shared shaders, metadata
+helpers and the existing native overlay/composition policy are unchanged.
 
 | Patch | Purpose |
 | --- | --- |
 | [kodi-9990-native-dv.patch](../patches/kodi/kodi-9990-native-dv.patch) | Integrate automatic native Dolby Vision playback and exact GPU transport. |
-| [kodi-9991-diagnostics.patch](../patches/kodi/kodi-9991-diagnostics.patch) | Add switchable playback/output diagnostics with bounded failure summaries. |
-| [kodi-9992-kernel-log.patch](../patches/kodi/kodi-9992-kernel-log.patch) | Copy relevant kernel DV rejection reasons into Kodi's log. |
 | [kodi-9993-fel-presentation-pairing.patch](../patches/kodi/kodi-9993-fel-presentation-pairing.patch) | Correct FEL picture pairing and recover accurate playback after seeks. |
+| [kodi-9994-hdmi-recovery.patch](../patches/kodi/kodi-9994-hdmi-recovery.patch) | Align sink validation and pace persistent HDMI failures. |
+| [kodi-9995-diagnostics.patch](../patches/kodi/kodi-9995-diagnostics.patch) | Record automatic compact diagnostics and kernel rejection reasons. |
 
 | Changed source file | High-level change |
 | --- | --- |
@@ -181,6 +183,9 @@ The shared shaders, metadata helpers and playback decisions are unchanged.
 | `xbmc/platform/linux/CMakeLists.txt` | Build/link the native DV adapter and shared helpers behind the existing build-time feature boundary. |
 | `xbmc/utils/DisplayInfo.cpp` | Parse and expose Standard-DV display capability from the existing EDID information. |
 | `xbmc/utils/DisplayInfo.h` | Store the detected DV display capability. |
+| `xbmc/utils/DVBridgeEdid.h` | Share the kernel's exact Standard-DV capability parser. |
+| `xbmc/utils/DVBridgeOutputRetry.h` | Track early/transient versus persistent output retries independently of logs. |
+| `xbmc/utils/DVBridgeDiagnosticState.h` | Bound failure/recovery reports without affecting output behavior. |
 | `xbmc/windowing/Resolution.cpp` | Constrain DV mode selection while keeping the existing non-DV policy. |
 | `xbmc/windowing/Resolution.h` | Declare the DV-aware mode-selection parameter. |
 | `xbmc/windowing/gbm/CMakeLists.txt` | Build/link the native DV adapter and shared helpers behind the existing build-time feature boundary. |
@@ -212,10 +217,11 @@ The separate HDR10 precision retry is not a DV metadata or tone-mapping change.
 
 ## Kernel diagnostics in Kodi
 
-`kodi-9992-kernel-log.patch` adds a separate, removable background logging hook:
+`kodi-9995-diagnostics.patch` includes the removable background logging hook:
 
 - `DRMAtomic.cpp`: request kernel evidence only after a bounded DV output failure.
 - `DVBridgeKernelLog.h`: parse kernel records; exclude userspace, stale, duplicate and unrelated messages.
 - `DVBridgeKernelLogReader.h`: read the kernel ring without blocking rendering or clearing the system log.
 
-`DVBRIDGE_KERNEL_LOG=0` disables the hook. No video processing or output policy changes.
+`DVBRIDGE_DIAGNOSTICS=0` disables the added Kodi supplement. The separate
+compatibility/recovery patches are unaffected. See [DIAGNOSTICS.md](DIAGNOSTICS.md).

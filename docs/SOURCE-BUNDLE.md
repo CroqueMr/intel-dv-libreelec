@@ -1,10 +1,10 @@
 # Corresponding build sources
 
-This source bundle accompanies Intel DV for LibreELEC 0.2.1-opt1. It includes:
+This source bundle accompanies Intel DV for LibreELEC 0.2.1a-opt1. It includes:
 
 - The exact pinned upstream LibreELEC Git tree, with its build scripts, package
   recipes, upstream patches and notices. The snapshot is intentionally shallow.
-- The additional Intel DV repository, patches, notices, tests and recipe overrides.
+- The additional Intel DV repository, patches, notices and recipe overrides.
 - The verified source archive cache used by the build, including build-time
   dependencies and upstream firmware/driver distributions. Unused cached dependencies
   may be present; this is not a minimal software bill of materials.
@@ -22,11 +22,11 @@ configuration, media or the build host's compiled toolchain.
 For installation or updating, download the image or update archive instead;
 this bundle is only needed for source review, rebuilding and redistribution.
 
-Download both `intel-dv-libreelec-0.2.1-opt1-complete-sources.tar.part-*` files
+Download both `intel-dv-libreelec-0.2.1a-opt1-complete-sources.tar.part-*` files
 from the same release. In an empty directory:
 
 ```sh
-cat intel-dv-libreelec-0.2.1-opt1-complete-sources.tar.part-* > complete-sources.tar
+cat intel-dv-libreelec-0.2.1a-opt1-complete-sources.tar.part-* > complete-sources.tar
 tar -xf complete-sources.tar
 cd corresponding-sources
 sha256sum --check BUNDLE-SHA256SUMS
@@ -35,7 +35,8 @@ sha256sum --check BUNDLE-SHA256SUMS
 **Both numbered source parts are required**. Never combine parts from different
 releases.
 
-This bundle contains the Opt1 diagnostics patch and recipe snapshot matching the new image.
+This bundle contains the compatibility, recovery and lightweight diagnostic
+patches and recipe snapshot matching the new image.
 Upstream licenses remain in the source archives; additional distribution notices
 are under `third-party-notices/`. The original rc1 release remains available
 separately.
@@ -55,8 +56,8 @@ python3 "$tool_dir/apply-overlay.py" LibreELEC-DV
 cp -a sources LibreELEC-DV/sources
 cd LibreELEC-DV
 PROJECT=Generic ARCH=x86_64 OFFICIAL=no \
-  BUILDER_NAME=Intel-DV CUSTOM_VERSION=13.0-intel-dv-0.2.1-opt1 \
-  CUSTOM_IMAGE_NAME=LibreELEC-Generic.x86_64-13.0-intel-dv-0.2.1-opt1 make image
+  BUILDER_NAME=Intel-DV CUSTOM_VERSION=13.0-intel-dv-0.2.1a-opt1 \
+  CUSTOM_IMAGE_NAME=LibreELEC-Generic.x86_64-13.0-intel-dv-0.2.1a-opt1 make image
 ```
 
 The source inputs are fixed; bit-for-bit identical output across different build

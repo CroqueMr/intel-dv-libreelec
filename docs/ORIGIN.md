@@ -28,3 +28,21 @@ Examples reviewed: [LibreELEC community-build policy](https://libreelec.tv/2018/
 [LibreELEC-RR](https://github.com/5schatten/LibreELEC-RR).
 Their README presentation/build structure informed this repository organization;
 their implementation code was not imported for that purpose.
+
+## Standard-DV display compatibility (R0.2.1a-opt1)
+
+The shared `dvbridge_edid.h` / `DVBridgeEdid.h` parser is an original, bounded
+implementation of public EDID fields. Its two copies are byte-identical and
+tested in C and C++. Field layouts were checked against libdisplay-info 0.4.0
+(`cta.c`, Dolby video block parsing) and its
+[public header documentation](https://emersion.pages.freedesktop.org/libdisplay-info/libdisplay-info/cta.h.html).
+No libdisplay-info parser implementation was copied into the kernel.
+
+Legacy HDMI-OUI Standard-DV packet selection was cross-checked against the
+[public Amlogic HDMI implementation](https://nest-open-source.googlesource.com/manifest_repos/kernel/+/1650886512330522da41d487bb2ce75fd5da5ec8/drivers/amlogic/media/vout/hdmitx/hdmi_tx_20/hdmi_tx_main.c)
+at revision `1650886512330522da41d487bb2ce75fd5da5ec8`, in its v0/v1 signaling
+branch: 24-byte payload, HDMI OUI and the legacy 4K VIC mapping. Only the protocol
+facts were used; the vendor driver/control flow was not imported. The Linux
+patch extends the existing kernel packet structures and canonical serializer.
+Its source notices are preserved. This reference is not a proprietary Dolby SDK
+and is not a claim of vendor endorsement or physical compatibility.

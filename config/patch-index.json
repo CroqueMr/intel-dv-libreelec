@@ -241,35 +241,6 @@
       "tools/dvbridge/pack_gles300.vert": "Generate full-screen transport geometry with the required orientation."
     }
   },
-  "patches/kodi/kodi-9991-diagnostics.patch": {
-    "component": "kodi",
-    "summary": "Report bounded output and render failures with optional native Kodi debug detail",
-    "files": {
-      "xbmc/utils/DVBridgeDiagnosticState.h": "Add diagnostics only; preserve rendering and output decisions.",
-      "xbmc/cores/VideoPlayer/VideoRenderers/DVBridgeGLES.cpp": "Add diagnostics only; preserve rendering and output decisions.",
-      "xbmc/cores/VideoPlayer/VideoRenderers/DVBridgeGLES.h": "Add diagnostics only; preserve rendering and output decisions.",
-      "xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp": "Add diagnostics only; preserve rendering and output decisions.",
-      "xbmc/windowing/gbm/drm/DRMAtomic.cpp": "Add diagnostics only; preserve rendering and output decisions.",
-      "xbmc/windowing/gbm/drm/DRMAtomic.h": "Add diagnostics only; preserve rendering and output decisions.",
-      "xbmc/windowing/gbm/drm/DVBridgeState.cpp": "Add diagnostics only; preserve rendering and output decisions."
-    }
-  },
-  "patches/linux/linux-9902-dv-diagnostics.patch": {
-    "component": "linux",
-    "summary": "Explain rejected Intel DV link policy without changing eligibility",
-    "files": {
-      "drivers/gpu/drm/i915/display/intel_hdmi.c": "Add diagnostics only; preserve rendering and output decisions."
-    }
-  },
-  "patches/kodi/kodi-9992-kernel-log.patch": {
-    "component": "kodi",
-    "summary": "Copy recent kernel DV rejection reasons into Kodi logs without blocking playback",
-    "files": {
-      "xbmc/windowing/gbm/drm/DRMAtomic.cpp": "Schedule bounded background kernel diagnostics after output rejection.",
-      "xbmc/utils/DVBridgeKernelLog.h": "Filter kernel-origin DV records by age and sequence number.",
-      "xbmc/windowing/gbm/drm/DVBridgeKernelLogReader.h": "Read the kernel ring without consuming other readers or polling during healthy playback."
-    }
-  },
   "patches/kodi/kodi-9993-fel-presentation-pairing.patch": {
     "component": "kodi",
     "summary": "Pair FEL pictures and recover both layers after seeks",
@@ -280,6 +251,56 @@
       "xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp": "Preserve the requested seek position while feeding native DV decoder preroll; leave non-DV seeks unchanged.",
       "xbmc/cores/VideoPlayer/DVDDemuxers/CMakeLists.txt": "Add the private DV helper include path only when the bridge is built.",
       "xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.cpp": "Discard pre-anchor pictures and handle exhausted enhancement streams through the native player."
+    }
+  },
+  "patches/linux/linux-9902-hdmi-compatibility.patch": {
+    "summary": "Align Standard DV sink detection and legacy HDMI signaling",
+    "component": "linux",
+    "files": {
+      "drivers/gpu/drm/i915/display/dvbridge_edid.h": "Validate complete EDIDs and distinguish Standard DV v0/v1/v2, legacy signaling and LLDV-only sinks.",
+      "drivers/gpu/drm/i915/display/intel_display.c": "Recognize both modern and legacy Standard DV packets for byte-safe scanout and modeset guards.",
+      "drivers/gpu/drm/i915/display/intel_dv_lab_policy.h": "Use shared sink eligibility while preserving existing byte-safe transport restrictions.",
+      "drivers/gpu/drm/i915/display/intel_hdmi.c": "Choose valid Standard DV HDMI signaling and enforce advertised timing capabilities.",
+      "drivers/video/hdmi.c": "Pack and validate the legacy Standard DV vendor packet without changing ordinary HDMI packets.",
+      "include/linux/hdmi.h": "Represent the opt-in legacy Standard DV vendor packet explicitly."
+    }
+  },
+  "patches/linux/linux-9903-diagnostics.patch": {
+    "summary": "Retain bounded kernel rejection reasons without verbose DRM logging",
+    "component": "linux",
+    "files": {
+      "drivers/gpu/drm/i915/display/intel_display.c": "Report bounded scanout safety rejection reasons without changing admission decisions.",
+      "drivers/gpu/drm/i915/display/intel_display_types.h": "Store connector-local diagnostic rate limits, separate from output policy.",
+      "drivers/gpu/drm/i915/display/intel_hdmi.c": "Log the first DV link/clock rejection and rate-limit repeats per connector."
+    }
+  },
+  "patches/kodi/kodi-9994-hdmi-recovery.patch": {
+    "summary": "Share sink validation and retry transient HDMI failures without permanent exclusion",
+    "component": "kodi",
+    "files": {
+      "xbmc/utils/DVBridgeEdid.h": "Use the exact same side-effect-free sink parser as the kernel.",
+      "xbmc/utils/DVBridgeOutputRetry.h": "Space repeated failed output attempts, retain immediate transient recovery and permit link-change reset.",
+      "xbmc/utils/DisplayInfo.cpp": "Derive native DV eligibility from the shared EDID validation result.",
+      "xbmc/utils/DisplayInfo.h": "Retain the validated sink capabilities alongside native display information.",
+      "xbmc/windowing/gbm/WinSystemGbm.cpp": "Ensure restoration is never delayed by DV retry pacing.",
+      "xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp": "Avoid repeated GPU preparation while a rejected DV output is waiting to retry.",
+      "xbmc/windowing/gbm/drm/DRMAtomic.cpp": "Recover rejected DV transactions while keeping ordinary Kodi atomic commits unchanged.",
+      "xbmc/windowing/gbm/drm/DRMAtomic.h": "Keep DV recovery state independent from diagnostics and normal output state."
+    }
+  },
+  "patches/kodi/kodi-9995-diagnostics.patch": {
+    "summary": "Provide lightweight automatic DV diagnostics in the normal Kodi log",
+    "component": "kodi",
+    "files": {
+      "xbmc/cores/VideoPlayer/VideoRenderers/DVBridgeGLES.cpp": "Report setup failures, first frame and coarse rendering summaries without GPU queries.",
+      "xbmc/cores/VideoPlayer/VideoRenderers/DVBridgeGLES.h": "Keep lightweight renderer diagnostic counters separate from frame state.",
+      "xbmc/utils/DVBridgeDiagnosticState.h": "Bound failure and recovery reports independently of rendering and retry state.",
+      "xbmc/utils/DVBridgeKernelLog.h": "Filter recent kernel-origin DV and Intel display faults and deduplicate repeated content.",
+      "xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp": "Log stream eligibility and rate-limited native DV setup failures.",
+      "xbmc/windowing/gbm/WinSystemGbmGLESContext.h": "Store the native setup diagnostic limiter.",
+      "xbmc/windowing/gbm/drm/DRMAtomic.cpp": "Report committed signal changes, bounded output failures and asynchronous kernel evidence.",
+      "xbmc/windowing/gbm/drm/DRMAtomic.h": "Declare isolated diagnostic accounting and first-snapshot state.",
+      "xbmc/windowing/gbm/drm/DVBridgeKernelLogReader.h": "Collect bounded kernel causes asynchronously and explicitly report truncated or lost evidence."
     }
   }
 }

@@ -1,169 +1,62 @@
 # Validation
 
-## What the evidence means
+## R0.2.1a-opt1
 
-Source checks, software tests and physical HDMI playback are separate results.
-The i7-11390H/LG G5 implementation passed the recorded successful native playback
-protocols without an observed playback problem. That is not universal hardware
-qualification or certification. A freshly packaged release image is identified
-separately in its build receipt; prior hardware results are not silently
-relabelled as tests of a different binary.
+Software checks and real HDMI playback are separate evidence. The qualified
+image was installed on i7-11390H with a modern LG Standard-DV display. The public
+image was then repackaged under the R0.2.1a-opt1 name; kernel and playback
+binaries are unchanged. This naming-only package was not separately replayed.
 
-| Area | Recorded coverage |
+| Area | Result |
 | --- | --- |
-| Native HDMI playback | P5, P7 FEL, P8.1 CM4, P8.4 CM4 and P10 CM4 on i7-11390H. |
-| FEL reconstruction | Demonstrable enhancement-layer contribution; exact GPU output comparisons, including active-area masking and orientation. |
-| Optimized renderer | Twelve deterministic 4K cases, 33,177,600 transport bytes per case, equal to the separate full-precision path, including 320-pixel L5 masks. Additional real-frame comparisons on six sources. |
-| Lanczos tap sampling | 288 exact FP32 comparisons against linear tap sampling, covering float/UNORM input, one/two components, both axes, 2x/4x enlargement, downscaling, offsets, crops, identity-size fallback and custom clamp/taper settings. |
-| Steady playback | Bounded uninterrupted cadence checks, including 23.976 fps; no observed increasing steady drop counters or irregular new-frame intervals in successful runs. |
-| Controls and restore | Pause, resume, seek, player OSD, subtitles, audio-track switching, stop and return to the 4K60 interface. |
-| Non-DV control | HDR10 source without RPU stays on Kodi's native HDR path, with the DV connector property disabled. |
-| Upstream menus | Original LibreELEC settings/service; no activation addon or environment switch. |
-| Software | R0.2.1-opt1: 18 C/C++ host checks with ASan/UBSan; 31 Python source/installer/image-path checks. |
+| Software regression checks | 21 C/C++ checks with ASan/UBSan and 33 Python checks passed in the internal qualification suite. |
+| HDMI packets and capabilities | Actual kernel packet pack/unpack checks and malformed-input tests passed; modern and legacy DV active-state guards checked. |
+| Source reproducibility | All 29 patches apply without fuzz; 93 modified kernel/Kodi source files match the build after reconstructing stock LibreELEC plus this overlay. |
+| Playback transitions | 19 software-state scenarios passed across SDR, HDR10, HLG, P5, P7 FEL, P8.1, P8.4 and P10, including direct file changes, pause/resume, seeks and return to SDR. Kodi did not restart. |
+| Continuous playback | Two-minute P8.1 playback at 4K23.976 completed with no reported renderer presentation or stage failures; returned to the 4K60 SDR interface. These counters are not a measurement of every dropped/skipped frame. |
+| Diagnostics | Automatic state changes and bounded summaries recorded; filtering, continuation through a busy kernel log and diagnostics-disabled transactions checked. |
+| Packaging | Image dependency audit and complete-source inventory checks passed. Kernel and playback binaries match the qualified image; release identification files changed for the public name. |
+| Native behavior | Original menus retained. SDR/HDR10/HLG sources use Kodi's native path, with HDMI-DV disabled. |
 
-P7 MEL has explicit code/software coverage; P8.2 shares the metadata/reshaping
-pipeline. Neither has a dedicated physical LE qualification result in this
-release. P9 is not supported by the pinned H.264 metadata pipeline. P10 playback
-evidence does not qualify every profile-10 compatibility variant or 4K60 workload.
+The internal build/test harnesses and lab reports are not distributed in this
+repository. Reproducible image build scripts, pinned sources, patches, licenses
+and corresponding sources remain available.
 
-Startup, final-frame and user-interaction disturbances are recorded separately.
-Uncommanded drops/duplicates during steady playback remain failures. A missing
-image, wrong colors, lost enhancement layer or stale frame metadata is never
-accepted as a successful DV result merely because the TV shows a DV logo.
+## Rendering evidence retained
 
-## Run the portable checks
+The unchanged optimized renderer was previously checked against its separate
+full-precision path on twelve deterministic 4K cases and six real-frame sources.
+Lanczos sampling checks compared 288 FP32 cases, including fallback conditions.
+FEL seek checks compared 2,876 reference enhancement pictures and repeated seeks;
+successful physical runs verified picture order and continued playback.
 
-Run the test suite on Linux, including a Linux filesystem in WSL. The image-path
-tests require Linux symlink semantics; native Windows is not a supported test or
-build host. The checks do not require the target Intel PC or an attached TV.
+CM2.9/CM4 transport and the tested profile paths remain unchanged by this release.
+Startup and user-interaction disturbances are evaluated separately from steady
+playback. A DV logo alone never proves correct image reconstruction or metadata.
+
+## Limits
+
+- No physical v0/v1 sink or the reported 12400T/matrix route was available for
+  this qualification. Their capability/signaling code is tested in software,
+  not certified across all receivers, switches or televisions.
+- No new N100 performance measurement was made.
+- P7 MEL and P8.2 do not have dedicated physical LibreELEC qualification here.
+  P9 is not supported by the pinned H.264 metadata path; P10 evidence does not
+  qualify every compatibility variant or refresh rate.
+- Software display-state checks are not an external HDMI capture, visual
+  certification or a guarantee of zero dropped frames.
+- Diagnostics are deliberately bounded. Unavailable or truncated kernel
+  evidence is reported where detectable; this is not a full system journal.
+
+## Source checks
+
+On Linux with Python 3.12 or newer:
 
 ```sh
 python3 tools/verify.py
-python3 -m unittest discover -s tests -p 'test_*.py'
-```
-
-Use Python 3.12 or later for archive extraction. The source checker verifies
-build-input hashes, patch mappings, descriptions, canonical license texts,
-inherited-header receipts and generic private-data patterns. It is a useful
-gate, not a substitute for code review. Editing documentation or adding a normal
-source file does not require regenerating a repository-wide checksum inventory.
-Ignored local build outputs are not scanned in a Git checkout.
-
-For C/C++ tests, install CMake, Ninja, compilers, pkg-config, Mesa EGL/GLES/GBM
-development files, libdrm development files and llvmpipe. Build native-host
-dependencies from the same source cache with Meson, Make, LCMS2 development
-files and glad/Jinja2 available:
-
-```sh
-python3 tools/build-host-test-deps.py --source-cache /path/to/LibreELEC-DV/sources \
-  --output /path/to/new-host-dependencies --jobs 4
 python3 tools/check-patches.py --source-cache /path/to/LibreELEC-DV/sources \
   --output /path/to/new-source-check
-export HOST_PREFIX=/path/to/new-host-dependencies/prefix
-export KODI_SOURCE=/path/to/new-source-check/kodi/xbmc-b7afba240133a570145466cfaf6a6825f84c6ad1
-export PKG_CONFIG_PATH="$HOST_PREFIX/lib/pkgconfig"
-cmake -S tests/host-build -B host-tests -G Ninja \
-  -DDVBRIDGE_KODI_SOURCE="$KODI_SOURCE" \
-  -DDVBRIDGE_COMMON_SOURCE="$KODI_SOURCE/tools/dvbridge"
-cmake --build host-tests --parallel 4
-ctest --test-dir host-tests --output-on-failure
 ```
 
-The host-only minimal FFmpeg and llvmpipe renderer are **not** the target VAAPI
-stack. Decoder responses are mocked in the layer-queue test. DRM transaction
-tests inject failures; they do not certify an HDMI output. Assertions stay
-enabled even for Release test builds.
-
-On a suitable real GPU, `-DDVBRIDGE_TEST_GPU_EXACT=ON` adds the strict 4K
-fused-versus-composed byte comparison and the FP32 Lanczos comparison. The former
-requires fragment basic/quad subgroup support. Neither is enabled for the default
-software-only suite. Build the test dependencies with the complete current patch
-series: an older libplacebo library cannot validate a new optimization.
-
-The Lanczos test uses explicit unity blur to select the original linear-tap path
-and default blur to exercise eligible optimized taps, with otherwise identical
-filter settings. It compares every FP32 output byte before transport quantization.
-The fallback cases also protect against choosing the wrong aligned axis for a
-1:1 crop or fractional shift. The test is not installed in the playback image.
-
-The combined L5 and tap-fetch candidates were qualified on Iris Xe i7-11390H.
-Their earlier bounded P7 FEL/CM4 23.976 fps run showed no steady-state cadence
-faults in the software trace. This does not establish an N100 performance result
-or constitute an external HDMI frame capture. The source regression checks do
-not mean the original rc1 image contains the later optimization changes.
-
-## Image checks
-
-### R0.2.1-opt1 public packaging
-
-The image was rebuilt through LibreELEC's native image pipeline with the public
-version embedded in the system. The player and kernel are byte-identical to the
-qualified private fel3 image described below. All overlay inputs match the
-published manifest, the image dependency audit passes, and the 18 C/C++ plus
-31 Python checks were rerun successfully. The newly packaged disk image was not
-separately installed for another physical HDMI run.
-
-### FEL pairing and seek revision (private fel3 image)
-
-The full LibreELEC image was rebuilt and installed on the i7-11390H. Its runtime
-sources match the reviewed patch inputs; no temporary binary override remains.
-All 28 patches apply to the pinned sources. The 18 C/C++ host checks pass with
-ASAN/UBSAN and the 31 Python checks pass. This was the private qualification
-image preceding the public packaging described above.
-
-The independently coded FEL sample was compared with uninterrupted enhancement
-decode: 2,876 reference pictures, followed by seeks to 80, 20, 103, 4, 60 and 0s,
-with at least 100 post-target pixel hashes checked per seek. All compared pixels
-match, and the first post-target picture is within 50ms of the requested time.
-Software decoding is used only by that offline comparison, not by the player.
-Two unmatched trailing base pictures in the sample remain explicitly diagnosed.
-
-On the installed image, all six repeated seeks resumed at the requested positions
-and advanced normally; pause/resume and stop restored the display. An uninterrupted
-run reached EOF. Its 109-second steady interval contains 2,620 native render
-decisions, with no duplicate/backward picture timestamps, >1.5-frame scheduling
-gaps or drop-log entries. Transient action-time warnings are retained separately.
-These are native scheduling observations, not an external HDMI capture.
-
-The preceding candidate also passed bounded single/dual-track CM4 playback
-checks. Successful presentation reports FEL and CM2.9/CM4 through Kodi's native
-HDR detail; stopping clears the active HDMI-DV status. The final change does not
-alter shaders, metadata serialization, the kernel or other profile pipelines.
-
-### Earlier kernel-log-only candidate (before FEL integration)
-
-The initial rc3 preparation added a diagnostics-only Kodi patch; all 27 patches applied to the
-pinned sources without fuzz. All 31 Python source tests pass. The 17 C/C++ host tests pass with ASAN/UBSAN (GL
-leak checks disabled). New tests cover kernel-origin filtering, stale/duplicate
-records, size bounds, nonblocking access, ring overruns and permission failure.
-Kernel IO is injected in those tests; they do not read the host's kernel log.
-No physical HDMI requalification is claimed for this logging-only revision.
-
-### Opt1 diagnostics revision
-
-The diagnostic revision was rebuilt through the native LibreELEC image pipeline,
-including Linux and Kodi. All 26 patches apply without fuzz to the pinned sources.
-All 30 Python source/regression tests pass. The 15 C/C++ host tests pass with AddressSanitizer and UndefinedBehaviorSanitizer
-(leak detection disabled for the GL host suite), including failure-log throttling.
-The image dependency/configuration audit also passes.
-
-A disposable, network-isolated QEMU boot reached `multi-user.target`, confirmed
-from its framebuffer capture. Serial output was not available; the observation
-ended at 60 seconds with time synchronization still waiting, as expected without
-network access. This is a boot smoke test, not a Kodi playback or HDMI test.
-This diagnostic-only revision has not been requalified on physical HDMI hardware.
-
-```sh
-python3 tools/audit-image.py --tree /path/to/LibreELEC-DV \
-  --image /path/to/LibreELEC-DV/target/selected-image.img.gz \
-  --output image-audit.json
-```
-
-This checks the built image's dependencies, runtime search paths, DV build
-configuration, native settings, source manifest and compressed-image checksum.
-Dynamic drivers/plugins still need runtime checks. The optional `tools/boot-smoke.py`
-boots a disposable copy in QEMU, without network or physical disks; its virtual
-GPU cannot validate Intel decoding or DV reception.
-
-Tests under `tests/` are intentionally distributed so reviewers can reproduce
-the checks. They are not installed in the image and are not runtime debug hooks.
+These checks verify source inputs, license records and patch application, not
+physical HDMI playback. See [BUILD.md](BUILD.md) to reproduce the image.

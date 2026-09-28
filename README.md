@@ -5,7 +5,7 @@ Experimental Native Dolby Vision playback in Kodi on compatible Intel HDMI syste
 An independent **LibreELEC Generic x86_64 community build**, using Kodi's own
 VideoPlayer, VAAPI decoder and GBM/GLES display path. **No external player, or proprietary Dolby SDK is required.**
 
-**Release: R0.2.1-opt1.** Built on LibreELEC 13 development sources and
+**Release: R0.2.1a-opt1.** Built on LibreELEC 13 development sources and
 Kodi 22 Beta 2, not on a stable LibreELEC release. Not affiliated with or
 certified by LibreELEC, Kodi, Dolby or Intel. Report this build's issues here,
 not to upstream projects unless reproduced with their unmodified releases.
@@ -14,23 +14,24 @@ not to upstream projects unless reproduced with their unmodified releases.
 
 | Component | Base used | Patches | Purpose |
 | --- | --- | ---: | --- |
-| Linux / Intel display driver | 7.2.6 | 12 | Discover Standard DV displays, signal HDMI DV, protect byte-exact scanout and explain rejected native HDMI configurations. |
+| Linux / Intel display driver | 7.2.6 | 13 | Align Standard DV v0/v1/v2 sink detection, select matching HDMI signaling and protect byte-exact scanout. |
 | FFmpeg | 9.0 | 3 | Preserve extended DV metadata and recognize DV AV1 container tags. |
 | libplacebo | 7.372.0, pinned commit | 9 | Preserve rendering precision, correct neutral FEL residual rounding and support an exact, lower-overhead GPU path. |
-| Kodi + shared DV renderer | 22.0 Beta 2, pinned commit | 4 | Decode and pair video layers, recover FEL after seeks, synchronize metadata, present native HDMI DV and include switchable kernel diagnostics in Kodi's log. |
+| Kodi + shared DV renderer | 22.0 Beta 2, pinned commit | 4 | Decode/pair video layers, synchronize metadata, pace failed HDMI retries and record compact automatic DV diagnostics. |
 | LibreELEC build recipes | 13.0-devel, pinned commit | 2 recipe overrides | Build and link the matching components. |
 | Mesa / Intel Media Driver / libva | 26.2.3 / 26.3.5 / 2.24.1 | 0 | Use the existing graphics and hardware-decoding stack. |
 | LibreELEC Settings / Kodi skin | Upstream | 0 | Original menus and appearance; DV is selected automatically when eligible. |
 
-**28 functional patches**, with no separate licensing-only patch series.
+**29 patches**, with no separate licensing-only patch series.
 The two recipe overrides are counted separately, not as patches.
 The shared renderer is included in the Kodi patch; it is not another player.
 See [every patch and changed file](docs/CHANGES.md), [exact source versions](docs/VERSIONS.md)
 and [architecture](docs/ARCHITECTURE.md).
 
-Black screen or playback problem? Enable Kodi's existing debug logging, reproduce
-once, then disable it. [Diagnostic collection](docs/DIAGNOSTICS.md) includes both
-Kodi and kernel evidence; nothing is uploaded automatically.
+Black screen or playback problem? DV diagnostics are recorded automatically;
+share `kodi.log` without enabling global debug logging.
+[Diagnostic collection](docs/DIAGNOSTICS.md) includes relevant kernel evidence;
+nothing is uploaded automatically.
 
 ## Dolby Vision profiles
 
@@ -78,8 +79,8 @@ displays are outside the supported DV route. See [hardware requirements](docs/HA
 
 ## Get started
 
-**[Download the installation image](https://github.com/CroqueMr/intel-dv-libreelec/releases/download/R0.2.1-opt1/LibreELEC-Generic.x86_64-13.0-intel-dv-0.2.1-opt1.img.gz)**
-or **[download the manual update](https://github.com/CroqueMr/intel-dv-libreelec/releases/download/R0.2.1-opt1/LibreELEC-Generic.x86_64-13.0-intel-dv-0.2.1-opt1.tar)**.
+**[Download the installation image](https://github.com/CroqueMr/intel-dv-libreelec/releases/download/R0.2.1a-opt1/LibreELEC-Generic.x86_64-13.0-intel-dv-0.2.1a-opt1.img.gz)**
+or **[download the manual update](https://github.com/CroqueMr/intel-dv-libreelec/releases/download/R0.2.1a-opt1/LibreELEC-Generic.x86_64-13.0-intel-dv-0.2.1a-opt1.tar)**.
 
 Only one is needed.
 The larger [complete source bundle](docs/SOURCE-BUNDLE.md) is for developers and
@@ -87,7 +88,7 @@ redistribution, not installation.
 
 - [Install, update and recover](docs/INSTALL.md): use a spare device first.
 - [Build from the pinned sources](docs/BUILD.md): the repository contains the patches and recipes.
-- [Run the checks](docs/VALIDATION.md): software tests do not require a television.
+- [Validation and limitations](docs/VALIDATION.md).
 - [Licenses and source attribution](docs/LICENSING.md).
 
 
@@ -97,6 +98,5 @@ redistribution, not installation.
 - `overlay/` — LibreELEC package recipes.
 - `tools/` — scripts to apply, build-check and export the sources.
 - `config/` — pinned versions and patch/overlay manifests.
-- `tests/` — software regression tests, not installed in the image.
-- `docs/` — build guides, hardware notes and [release notes](docs/releases/0.2.1-opt1.md).
+- `docs/` — build guides, hardware notes and [release notes](docs/releases/0.2.1a-opt1.md).
 - `LICENSES/` — license texts and third-party notices.
