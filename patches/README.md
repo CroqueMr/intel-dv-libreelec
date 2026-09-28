@@ -3,21 +3,33 @@
 Apply each component's patches in filename order. Exact pinned versions are in
 [`docs/VERSIONS.md`](../docs/VERSIONS.md); the complete file-level index is in
 [`config/patch-index.json`](../config/patch-index.json). This guide highlights
-the changes prepared for R0.2.1a-opt1.
+the release's main functional changes.
 
 | Component | Patch count |
 | --- | ---: |
-| Linux / Intel display | 13 |
+| Linux / Intel display | 14 |
 | FFmpeg | 3 |
 | libplacebo | 9 |
-| Kodi / shared DV renderer | 4 |
-| **Total** | **29** |
+| Kodi / shared DV renderer | 5 |
+| **Total** | **31** |
 
 The two LibreELEC recipe overrides are separate build inputs, not patches.
+
+## Kodi 9996 and Linux 9904 - HDR10 output and Player information
+
+Kodi reuses FEL reconstruction and libplacebo for L1-guided HDR10 conversion,
+with a source-derived mastering target. Native Player settings select the
+output mode and optional information panel. Bounded playback-health summaries
+include drop/skip counters and render-engine usage. The Intel driver requires
+a validated deep-color link only for the selected HDR10 conversion path.
+LibreELEC Settings is unmodified.
+
+## Retained compatibility and diagnostics
+
 The previous three diagnostic patches are removed, not patched over. Four
 focused patches replace them: two for compatibility/recovery, two for logging.
 
-## Linux 9902 and Kodi 9994 — HDMI compatibility and recovery
+## Linux 9902 and Kodi 9994 - HDMI compatibility and recovery
 
 **Purpose:** agree on sink eligibility and recover transient output failures.
 
@@ -37,7 +49,7 @@ These changes do not replace Kodi's general hotplug/mode-selection behavior.
 An HDMI matrix can still supply a misleading EDID or modify the transmitted
 signal; software validation alone cannot qualify that physical route.
 
-## Linux 9903 and Kodi 9995 — lightweight automatic diagnostics
+## Linux 9903 and Kodi 9995 - lightweight automatic diagnostics
 
 **Purpose:** preserve useful failure evidence without global debug logging.
 
@@ -63,7 +75,7 @@ Linux 9903 with their manifest/index entries without removing native DV or
 the independent compatibility/recovery changes.
 See [`docs/DIAGNOSTICS.md`](../docs/DIAGNOSTICS.md) for collection and privacy.
 
-## Kodi 9993 — FEL picture pairing and seek recovery
+## Kodi 9993 - FEL picture pairing and seek recovery
 
 **Purpose:** keep base and enhancement pictures aligned when their coding order
 or random-access boundaries differ, including after a seek.

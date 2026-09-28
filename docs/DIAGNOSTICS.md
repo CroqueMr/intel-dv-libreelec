@@ -1,6 +1,6 @@
 # Playback diagnostics
 
-**R0.2.1a-opt1 records compact DV diagnostics automatically in `kodi.log`.**
+**This build records compact DV diagnostics automatically in `kodi.log`.**
 There is no diagnostic menu to enable and no need to turn on Kodi's global
 debug mode before reproducing a problem. No upload is performed.
 

@@ -302,5 +302,44 @@
       "xbmc/windowing/gbm/drm/DRMAtomic.h": "Declare isolated diagnostic accounting and first-snapshot state.",
       "xbmc/windowing/gbm/drm/DVBridgeKernelLogReader.h": "Collect bounded kernel causes asynchronously and explicitly report truncated or lost evidence."
     }
+  },
+  "patches/kodi/kodi-9996-output-modes-and-info.patch": {
+    "component": "kodi",
+    "summary": "Add L1-guided HDR10 conversion and optional native playback information",
+    "files": {
+      "addons/resource.language.en_gb/resources/strings.po": "Provide concise localized playback-setting labels and descriptions.",
+      "addons/skin.estuary/xml/DialogPlayerProcessInfo.xml": "Select the enhanced information panel or retain the stock Estuary panel.",
+      "addons/skin.estuary/xml/IncludesDVProcessInfo.xml": "Arrange native playback statistics and DV metadata in three readable columns.",
+      "system/settings/settings.xml": "Expose playback output and information preferences in native Kodi Player settings.",
+      "tools/dvbridge/dvbridge_placebo.c": "Derive the HDR10 reference peak from validated RPU mastering metadata.",
+      "tools/dvbridge/dvbridge_placebo.h": "Declare the source HDR metadata extraction interface.",
+      "tools/dvbridge/dvbridge_render.c": "Apply L1-guided libplacebo tone mapping after FEL reconstruction and quantize HDR10 output.",
+      "tools/dvbridge/dvbridge_render.h": "Expose HDR10 reference mapping and output quantization beside DV transport.",
+      "xbmc/cores/VideoPlayer/DVDCodecs/Video/DVOutputSettings.h": "Latch playback mode at the start of each playback session.",
+      "xbmc/cores/VideoPlayer/DVDCodecs/Video/DVPlaybackInfo.h": "Distinguish confirmed HDR10 presentation from Standard DV presentation.",
+      "xbmc/cores/VideoPlayer/DVDCodecs/Video/DVStreamTelemetry.h": "Collect bounded metadata snapshots and native counters only while information is visible.",
+      "xbmc/cores/VideoPlayer/VideoPlayer.cpp": "Apply output preferences at playback preparation, not during seeks or codec probes.",
+      "xbmc/cores/VideoPlayer/VideoPlayerVideo.cpp": "Record bounded playback-health summaries and expose native frame counters.",
+      "xbmc/cores/VideoPlayer/VideoPlayerVideo.h": "Keep per-stream diagnostic intervals and render occupancy baselines.",
+      "xbmc/cores/VideoPlayer/VideoRenderers/DVBridgeGLES.cpp": "Reuse layer reconstruction for HDR10 and track successfully presented output.",
+      "xbmc/cores/VideoPlayer/VideoRenderers/DVBridgeGLES.h": "Declare HDR10 render state and resolve operations.",
+      "xbmc/cores/VideoPlayer/VideoRenderers/LinuxRendererGLES.cpp": "Select the appropriate Standard-DV or HDR10 output setup for eligible video.",
+      "xbmc/dialogs/DVPixelFormat.h": "Describe source chroma subsampling separately from hardware surfaces and HDMI transport.",
+      "xbmc/dialogs/GUIDialogPlayerProcessInfo.cpp": "Populate source, processing and output fields at a bounded refresh rate.",
+      "xbmc/dialogs/GUIDialogPlayerProcessInfo.h": "Declare the optional information refresh lifecycle.",
+      "xbmc/utils/DVRenderUsage.h": "Measure Kodi render-engine occupancy from deduplicated DRM clients for the panel and bounded diagnostics.",
+      "xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp": "Select eligible HDR10 output, compose video and controls, and restore native display state.",
+      "xbmc/windowing/gbm/WinSystemGbmGLESContext.h": "Declare source-aware output selection and HDR10 presentation state.",
+      "xbmc/windowing/gbm/drm/DRMUtils.cpp": "Import opaque 10-bit framebuffers without changing their pixel layout."
+    }
+  },
+  "patches/linux/linux-9904-hdr10-conversion.patch": {
+    "component": "linux",
+    "summary": "Require a deep-color HDMI link only for explicitly selected HDR10 conversion",
+    "files": {
+      "drivers/gpu/drm/i915/display/intel_atomic.c": "Track and validate the opt-in HDR10 deep-color connector state.",
+      "drivers/gpu/drm/i915/display/intel_display_types.h": "Store the optional HDR10 connector property and atomic state.",
+      "drivers/gpu/drm/i915/display/intel_hdmi.c": "Reuse the validated deep-color format selection and reject sub-10-bit conversion links."
+    }
   }
 }

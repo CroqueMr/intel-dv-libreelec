@@ -1,5 +1,44 @@
 # Validation
 
+## R0.3.0
+
+The final image was installed on i7-11390H. Native Kodi Player > Videos exposes
+both preferences at Basic level; all values passed read/write checks. The
+LibreELEC settings addon contains no DV helper or custom DV settings. Standard
+DV Profile 7 FEL and Avatar Profile 8 playback supplied the release screenshots.
+The final 31-patch series applies to fresh pinned sources with zero fuzz.
+
+The HDR10 conversion adds L1-guided libplacebo mapping. Sanitized software
+tests cover metadata-driven output changes, unchanged native DV, FEL reference
+agreement, target selection and output quantization. Kodi compilation passes.
+Short real HDMI playback checks pass for Standard DV FEL, converted FEL, HDR10
+and SDR. Calibrated visual fidelity and sustained hardware performance of this
+new mapping have not been qualified. Earlier playback results below concern
+the previous conversion path, not the new mapping.
+
+The playback qualification below was run on the complete `0.3.0-dev4` image on
+the i7-11390H test system.
+No temporary player or skin overlay is required.
+
+| Area | Evidence |
+| --- | --- |
+| Build and sources | Complete Linux/Kodi/LibreELEC image build passed. Source and canonical-license checks passed. The final release contains 31 patches; the LibreELEC Settings modification was removed. |
+| Pixel preservation | Sanitized renderer tests passed for full/limited range and 1000, 2000, 4000 and 10000 nit PQ values without a 1000-nit mastering-metadata cap. |
+| Conversion playback | P5, P8.1, P8.4, P10.1 and two P7 FEL samples passed HDMI signaling and presentation checks, including repeated Woman-at-80s seeks. |
+| Output depth | The conversion pipe reports 30 bpp at 4K25 and 4K60. The 60 Hz case uses a retimed stress sample and the driver's validated deep-color format selection; it is not a full 60 fps profile-coverage claim. |
+| Native behavior | SDR remains SDR under each preference. Disabled mode uses the native HDR10/HLG path. At 4K60, its previous 24-bpp behavior is retained rather than globally altered. |
+| Preferences | Values persist across Kodi restart. A changed output mode does not alter an active session or a seek; it applies to the next playback. Native LibreELEC selection was exercised. |
+| Information | Enhanced and stock panels open and close with the existing player actions. No Dolby logos or speaker diagram are added. |
+| Render telemetry | Sanitized parser/delta tests cover duplicate clients, counter regression, capacity changes, missing data and sampling resets. Physical TV-Led and HDR10 FEL playback reports valid occupancy with unchanged drop/skip counters; properties stop refreshing when the panel closes. |
+| Steady playback | Final-image P7 FEL CM4 runs measured 90 seconds per output mode with unchanged native drop/skip counters. Mean render-engine occupancy was 51.38% TV-Led and 51.99% HDR10; total CPU was 1.38% and 1.42%. These are sample-specific engine measurements, not total GPU power or N100 results. |
+| Final restoration | No active player or failed service. The 4K60 desktop has DV signaling, conversion deep-color and HDR metadata cleared. Standard TV-Led defaults restored. |
+
+The HDR10 path preserves reconstructed source values, including supported FEL
+residuals. It does not claim proprietary target-display CM4 mapping or visual
+equivalence to a licensed Dolby conversion engine. The framebuffer is currently
+10-bit. The tested conversion output is
+progressive 3840x2160. No additional N100 or legacy-TV qualification is claimed.
+
 ## R0.2.1a-opt1
 
 Software checks and real HDMI playback are separate evidence. The qualified
@@ -60,3 +99,6 @@ python3 tools/check-patches.py --source-cache /path/to/LibreELEC-DV/sources \
 
 These checks verify source inputs, license records and patch application, not
 physical HDMI playback. See [BUILD.md](BUILD.md) to reproduce the image.
+# Format-aware information panel
+
+The adaptive panel was exercised with SDR, HDR10, HLG, Standard Dolby Vision and Dolby Vision converted to HDR10. Native formats select the compact panel; both DV paths retain source metadata. Missing metadata rows are hidden. HDR10 static mastering and content-light values were verified against the source. This UI change does not modify video processing or output selection.

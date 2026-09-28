@@ -45,9 +45,16 @@ correction included in the kernel patches; see the component change index.
 
 ## Deliberately unchanged
 
-No external mpv process, launch wrapper, custom Kodi skin, settings dialog,
+No external mpv process, launch wrapper, separate settings dialog,
 private activation service, patched Mesa or modified Intel Media Driver.
 LibreELEC's original settings addon and Kodi service remain upstream files.
+Playback preferences extend Kodi's native Player settings. The optional
+Player information panel extends Estuary; the stock panel remains available.
+
+HDR10 conversion reuses the reconstructed video and libplacebo in the same
+render pass. Frame-matched L1 statistics guide mapping to the source-derived
+mastering peak before GUI composition. The output is PQ/BT.2020 in a 10-bit
+framebuffer; native SDR/HDR sources retain Kodi's ordinary output path.
 
 The low-level `enable_dv_lab` parameter and `DVBRIDGE_DV_STANDARD_LAB` property
 retain their existing names because they are the kernel/userspace interface.

@@ -4,7 +4,7 @@
   "target": "LibreELEC Generic x86_64, Intel native HDMI",
   "runtime_opt_in_required": false,
   "activation": "automatic_when_stream_display_and_transport_are_eligible",
-  "settings": "upstream_unmodified",
+  "settings": "Native Kodi Player preferences; LibreELEC Settings remains unmodified",
   "files": {
     "packages/addons/addon-depends/multimedia-tools-depends/libplacebo/patches/libplacebo-9910-6-centered-lanczos.patch": "308ddc9d1c8747358e87b8833388cc3289d20a8d45311562ace48e8c9b66c06f",
     "packages/addons/addon-depends/multimedia-tools-depends/libplacebo/package.mk": "651652ab8873841b2c4004b36c9d2a2f28dd10298d564cc5a515c206b5fa6a13",
@@ -37,10 +37,12 @@
     "projects/Generic/patches/linux/linux-9902-hdmi-compatibility.patch": "1faa07613ad9181ec967fad696d76afdea7d6f79580ca861bff17ebd3fe9eab2",
     "projects/Generic/patches/linux/linux-9903-diagnostics.patch": "df48e37fe578e341402a2e2b71c7436d0a422b1425f773756c48f8911e846ed1",
     "projects/Generic/patches/kodi/kodi-9994-hdmi-recovery.patch": "0472da0a8d15bc092e866a89ef7f23c867b1a5faeebe453dee54978dda9f1eee",
-    "projects/Generic/patches/kodi/kodi-9995-diagnostics.patch": "9b64fc6f1e5068dd533d5832a4c6d3dd965191550495d0e161992040e6e5ae19"
+    "projects/Generic/patches/kodi/kodi-9995-diagnostics.patch": "9b64fc6f1e5068dd533d5832a4c6d3dd965191550495d0e161992040e6e5ae19",
+    "projects/Generic/patches/kodi/kodi-9996-output-modes-and-info.patch": "8f6520fdda30e641d1afbfd75a4d5f3f83162be3fc8383a193d289f4754e1193",
+    "projects/Generic/patches/linux/linux-9904-hdr10-conversion.patch": "e67cd871453b6eceb5d4f2a7fffa9f7527e84b89beb88e2fb95d97d5070af9f1"
   },
   "schema": 2,
-  "release": "0.2.1a-opt1",
+  "release": "0.3.0",
   "source_map": {
     "packages/addons/addon-depends/multimedia-tools-depends/libplacebo/patches/libplacebo-9910-6-centered-lanczos.patch": "patches/libplacebo/libplacebo-9910-6-centered-lanczos.patch",
     "packages/addons/addon-depends/multimedia-tools-depends/libplacebo/package.mk": "overlay/packages/addons/addon-depends/multimedia-tools-depends/libplacebo/package.mk",
@@ -73,7 +75,9 @@
     "projects/Generic/patches/linux/linux-9902-hdmi-compatibility.patch": "patches/linux/linux-9902-hdmi-compatibility.patch",
     "projects/Generic/patches/linux/linux-9903-diagnostics.patch": "patches/linux/linux-9903-diagnostics.patch",
     "projects/Generic/patches/kodi/kodi-9994-hdmi-recovery.patch": "patches/kodi/kodi-9994-hdmi-recovery.patch",
-    "projects/Generic/patches/kodi/kodi-9995-diagnostics.patch": "patches/kodi/kodi-9995-diagnostics.patch"
+    "projects/Generic/patches/kodi/kodi-9995-diagnostics.patch": "patches/kodi/kodi-9995-diagnostics.patch",
+    "projects/Generic/patches/kodi/kodi-9996-output-modes-and-info.patch": "patches/kodi/kodi-9996-output-modes-and-info.patch",
+    "projects/Generic/patches/linux/linux-9904-hdr10-conversion.patch": "patches/linux/linux-9904-hdr10-conversion.patch"
   },
   "evidence": "docs/VALIDATION.md",
   "executables": [

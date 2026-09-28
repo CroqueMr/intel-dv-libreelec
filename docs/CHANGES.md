@@ -4,6 +4,17 @@ This index describes the actual exported patches, not an upstream fork history.
 Apply patches in filename order within each component. The Kodi patch includes
 the shared renderer; its internal files are listed individually below.
 
+### R0.3.0
+
+| Patch | Purpose | Scope |
+| --- | --- | --- |
+| `linux-9904-hdr10-conversion.patch` | Prevent an 8-bit HDMI fallback during HDR10 conversion. | Opt-in connector state reuses existing deep-color selection, including validated YCbCr 4:2:0 where needed. Ordinary Kodi playback does not enable this state. |
+| `kodi-9996-output-modes-and-info.patch` | L1-guided HDR10 conversion and optional Player information. | Reuses the layer decoder, FEL renderer and libplacebo spline mapping; adds source-derived reference luminance, 10-bit PQ output, bounded telemetry, native Kodi Player settings and the Estuary panel. |
+
+FFmpeg, libplacebo and the hardware decoder retain their qualified patch series.
+The complete index, including each changed file's purpose, is in
+`config/patch-index.json`. This release contains 31 patches. LibreELEC Settings is unmodified.
+
 ### FEL presentation pairing
 
 `kodi-9993-fel-presentation-pairing.patch` fixes stalls and back-and-forth motion
@@ -212,7 +223,7 @@ helpers and the existing native overlay/composition policy are unchanged.
 | `packages/mediacenter/kodi/package.mk` | Build/link libplacebo and enable the native DV adapter; retain the applicable combined-build license declaration; normalize embedded build paths. |
 | `packages/addons/addon-depends/multimedia-tools-depends/libplacebo/package.mk` | Pin the tested libplacebo revision, enable DV/GLES and build a shared target library; normalize embedded build paths. |
 
-No LibreELEC Settings, systemd activation service or skin patch is included.
+No LibreELEC Settings or systemd activation service modification is included. The optional Estuary information panel is part of the Kodi output patch.
 The separate HDR10 precision retry is not a DV metadata or tone-mapping change.
 
 ## Kernel diagnostics in Kodi

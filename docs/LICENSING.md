@@ -42,7 +42,7 @@ obligations or constitute an independent certification of the implementation.
 ## Source and binary releases
 
 The source ZIP contains our patch set, exact recipes, build instructions and
-tests. An image contains many more components; its matching source delivery
+source-verification tools. An image contains many more components; its matching source delivery
 must therefore also include the pinned LibreELEC source tree, the exact source
 archives used, relevant build scripts/configuration and package notices.
 

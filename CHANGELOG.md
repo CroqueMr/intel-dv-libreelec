@@ -1,5 +1,16 @@
 # Changelog
 
+## R0.3.0
+
+- Native Kodi Player settings: Standard Dolby Vision (TV-Led), HDR10 conversion, or vanilla Kodi playback.
+- HDR10 conversion with FEL reconstruction and L1-guided tone mapping to a source-derived mastering target.
+- Optional Player information panel with source format, bit depth, metadata and GPU render usage.
+- Lightweight automatic diagnostics for frame drops, skips and playback transitions.
+
+Standard DV remains the default. The current HDR10 framebuffer is 10-bit;
+HDR10 conversion does not reproduce
+proprietary target-display CM4 mapping. See [output modes](docs/OUTPUT-MODES.md).
+
 ## R0.2.1a-opt1
 
 - **Lighter automatic diagnostics:** DV and relevant kernel details in the normal Kodi log, with bounded summaries instead of repeated output.

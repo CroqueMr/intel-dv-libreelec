@@ -15,7 +15,7 @@ Build all patched components together: the FFmpeg metadata extension is an ABI c
 | libva | 2.24.1 | `release archive; hash checked by recipe` | No |
 | LibreELEC Settings | Pinned source | `9cf5f9868c48878a31ee9f97d290af889dd1c879` | No |
 
-The checksummed upstream archives for the four patched components are listed
+The checksummed upstream archives for the patched components are listed
 in `tools/check-patches.py`. LibreELEC pins the rest of the distribution, including
 its compiler, graphics stack, bootloader, firmware and settings addon.
 

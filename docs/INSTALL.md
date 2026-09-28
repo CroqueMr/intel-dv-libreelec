@@ -12,8 +12,9 @@ LibreELEC/Kodi versions.
 3. Boot it on the intended Intel machine and use LibreELEC's normal setup wizard.
 4. Connect a qualifying Standard-DV TV through native HDMI. Configure Kodi's
    ordinary refresh-rate adjustment/whitelist for the modes your TV supports.
-5. Play a compatible file through Kodi. There is no experimental-DV toggle:
-   selection is automatic. Kodi's existing player information reports the
+5. Play a compatible file through Kodi. Standard Dolby Vision is selected by
+   default. Output mode and the enhanced information panel are configurable in
+   **Settings > Player > Videos**, at **Basic** level. Player information reports the
    source and active DV transport; the display's own DV indicator is a separate
    confirmation.
 
