@@ -15,6 +15,21 @@ FFmpeg, libplacebo and the hardware decoder retain their qualified patch series.
 The complete index, including each changed file's purpose, is in
 `config/patch-index.json`. This release contains 31 patches. LibreELEC Settings is unmodified.
 
+### Static HDR10 metadata during native DV
+
+`kodi-9997-dv-static-metadata-latch.patch` removes a mid-playback DV restart on
+streams whose HDR10 mastering and light-level SEI is carried only on the first
+IRAP. At the next IRAP the decoder previously reported the frame without static
+metadata. Kodi's renderer manager compares that as a format change and rebuilds
+the renderer, and renderer teardown ends native DV output. The HDMI signal left
+DV and re-entered it (two full modesets, a visible interruption and an HDMI
+audio reset) about one GOP after playback started.
+
+For native DV streams the decoder now keeps the last in-band static metadata for
+the rest of the stream. A new SEI still replaces it, container metadata is still
+the fallback before any SEI has been seen, and state is reset when a stream is
+opened. Seeks keep it. Ordinary HDR10, HLG and SDR playback is unchanged.
+
 ### FEL presentation pairing
 
 `kodi-9993-fel-presentation-pairing.patch` fixes stalls and back-and-forth motion
