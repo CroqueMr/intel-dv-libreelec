@@ -341,5 +341,13 @@
       "drivers/gpu/drm/i915/display/intel_display_types.h": "Store the optional HDR10 connector property and atomic state.",
       "drivers/gpu/drm/i915/display/intel_hdmi.c": "Reuse the validated deep-color format selection and reject sub-10-bit conversion links."
     }
+  },
+  "patches/kodi/kodi-9997-dv-static-metadata-latch.patch": {
+    "component": "kodi",
+    "summary": "Keep in-band HDR10 static metadata for the rest of a DV stream",
+    "files": {
+      "xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.cpp": "Reuse the last in-band mastering and light-level metadata when a later DV frame omits the SEI, so the renderer is not rebuilt mid-playback.",
+      "xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.h": "Store the per-stream HDR10 static metadata, reset when the decoder opens a stream."
+    }
   }
 }
