@@ -39,7 +39,8 @@
     "projects/Generic/patches/kodi/kodi-9994-hdmi-recovery.patch": "0472da0a8d15bc092e866a89ef7f23c867b1a5faeebe453dee54978dda9f1eee",
     "projects/Generic/patches/kodi/kodi-9995-diagnostics.patch": "9b64fc6f1e5068dd533d5832a4c6d3dd965191550495d0e161992040e6e5ae19",
     "projects/Generic/patches/kodi/kodi-9996-output-modes-and-info.patch": "8f6520fdda30e641d1afbfd75a4d5f3f83162be3fc8383a193d289f4754e1193",
-    "projects/Generic/patches/linux/linux-9904-hdr10-conversion.patch": "e67cd871453b6eceb5d4f2a7fffa9f7527e84b89beb88e2fb95d97d5070af9f1"
+    "projects/Generic/patches/linux/linux-9904-hdr10-conversion.patch": "e67cd871453b6eceb5d4f2a7fffa9f7527e84b89beb88e2fb95d97d5070af9f1",
+    "projects/Generic/patches/kodi/kodi-9997-dv-static-metadata-latch.patch": "96d97c03cfcdffe36e27e76f8aaa02e305fc8644874ee04721cb05b61fe5f493"
   },
   "schema": 2,
   "release": "0.3.0",
@@ -77,7 +78,8 @@
     "projects/Generic/patches/kodi/kodi-9994-hdmi-recovery.patch": "patches/kodi/kodi-9994-hdmi-recovery.patch",
     "projects/Generic/patches/kodi/kodi-9995-diagnostics.patch": "patches/kodi/kodi-9995-diagnostics.patch",
     "projects/Generic/patches/kodi/kodi-9996-output-modes-and-info.patch": "patches/kodi/kodi-9996-output-modes-and-info.patch",
-    "projects/Generic/patches/linux/linux-9904-hdr10-conversion.patch": "patches/linux/linux-9904-hdr10-conversion.patch"
+    "projects/Generic/patches/linux/linux-9904-hdr10-conversion.patch": "patches/linux/linux-9904-hdr10-conversion.patch",
+    "projects/Generic/patches/kodi/kodi-9997-dv-static-metadata-latch.patch": "patches/kodi/kodi-9997-dv-static-metadata-latch.patch"
   },
   "evidence": "docs/VALIDATION.md",
   "executables": [
