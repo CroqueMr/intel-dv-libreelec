@@ -349,5 +349,13 @@
       "xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.cpp": "Reuse the last in-band mastering and light-level metadata when a later DV frame omits the SEI, so the renderer is not rebuilt mid-playback.",
       "xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.h": "Store the per-stream HDR10 static metadata, reset when the decoder opens a stream."
     }
+  },
+  "patches/kodi/kodi-9998-activeae-sink-retry.patch": {
+    "component": "kodi",
+    "summary": "Reopen the audio sink when retrying after a failed sink init",
+    "files": {
+      "xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.cpp": "Force InitSink() on the next Configure() after a failed sink init instead of configuring against the stale sink format.",
+      "xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.h": "Track whether the last sink init failed."
+    }
   }
 }
