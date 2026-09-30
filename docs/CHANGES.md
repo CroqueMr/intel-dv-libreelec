@@ -30,6 +30,22 @@ the rest of the stream. A new SEI still replaces it, container metadata is still
 the fallback before any SEI has been seen, and state is reset when a stream is
 opened. Seeks keep it. Ordinary HDR10, HLG and SDR playback is unchanged.
 
+### Audio sink retry after a failed init
+
+`kodi-9998-activeae-sink-retry.patch` fixes an ActiveAE crash when playback
+stops during an HDMI mode change. The sink reopen can fail transiently while
+the display changes mode. `Configure()` has then already stored the new request
+in `m_sinkRequestFormat`, so the 500 ms retry compares the request with itself,
+skips `InitSink()` and configures buffers and resamplers against the stale sink
+format (for example the previous passthrough format). Resampler setup fails and
+freeing the mismatched buffer pools corrupts the heap (`swr_get_delay()` on a
+NULL context, or an abort in `~CActiveAEBufferPool`). Leaving native DV at stop,
+followed by the refresh-rate restore, makes this likely.
+
+`Configure()` now reopens the sink on the next attempt after a failed
+`InitSink()`, which is what the error-state retry expects. This is a stock Kodi
+defect; the change is not DV-specific.
+
 ### FEL presentation pairing
 
 `kodi-9993-fel-presentation-pairing.patch` fixes stalls and back-and-forth motion
