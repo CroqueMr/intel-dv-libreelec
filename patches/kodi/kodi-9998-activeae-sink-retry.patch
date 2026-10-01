@@ -1,8 +1,8 @@
 diff --git a/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.cpp b/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.cpp
-index d7af839..ff6697a 100644
+index c0e801d..b8fe8bf 100644
 --- a/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.cpp
 +++ b/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.cpp
-@@ -1217,12 +1217,17 @@ void CActiveAE::Configure(AEAudioFormat *desiredFmt)
+@@ -1256,12 +1256,17 @@ void CActiveAE::Configure(AEAudioFormat *desiredFmt)
    const AESinkDevice dev = CAESinkFactory::ParseDevice(device);
    const bool requestedDefaultDevice = IsDefaultDevice(dev);
  
@@ -23,13 +23,13 @@ index d7af839..ff6697a 100644
      m_settings.driver = dev.driver;
      m_currDevice = dev.name;
 diff --git a/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.h b/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.h
-index f88a5f5..c4feeba 100644
+index 1c040d7..599b679 100644
 --- a/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.h
 +++ b/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.h
-@@ -354,6 +354,9 @@ protected:
-   bool m_bStateMachineSelfTrigger;
+@@ -355,6 +355,9 @@ protected:
    std::chrono::milliseconds m_extTimeout;
    bool m_extError;
+   unsigned int m_extErrorRetries{0};
 +  // The last InitSink() failed: the sink must be opened again before the
 +  // pipeline is configured against m_sinkFormat.
 +  bool m_sinkInitFailed{false};

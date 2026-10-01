@@ -240,7 +240,7 @@
    {
 --- a/xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp
 +++ b/xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp
-@@ -552,6 +552,8 @@
+@@ -554,6 +554,8 @@
                                              dvbridge_geometry geometry)
  {
    m_dvFrame = false;
@@ -358,9 +358,8 @@
 +    const int error = errno;
      CLog::LogF(LOGERROR, "atomic commit failed: {}", strerror(errno));
 -    return reject();
--  }
 +    return reject(error);
-+  }
+   }
 +  if (strict)
 +    m_dvRetry.Reset();
    FinishRequest(true);
@@ -371,9 +370,8 @@
  }
  
 -bool CDRMAtomic::FlipPageTransactional(struct gbm_bo* bo)
--{
 +bool CDRMAtomic::FlipPageTransactional(struct gbm_bo* bo, bool restore)
-+{
+ {
 +  // Restoration must always be attempted, including after rejected DV output.
 +  if (!restore && !DVRetryReady())
 +  {

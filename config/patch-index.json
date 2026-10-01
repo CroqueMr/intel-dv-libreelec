@@ -357,5 +357,21 @@
       "xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.cpp": "Force InitSink() on the next Configure() after a failed sink init instead of configuring against the stale sink format.",
       "xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.h": "Track whether the last sink init failed."
     }
+  },
+  "patches/libreelec/kodi/9902-headers-only.patch": {
+    "component": "libreelec",
+    "summary": "LibreELEC master's refreshed headers-only patch for Kodi 22.0 RC1 (LibreELEC.tv b452c034d8a6, b40d47767c95)",
+    "files": {
+      "CMakeLists.txt": "Unchanged from LibreELEC: build only the headers and CMake helpers when HEADERS_ONLY is set.",
+      "cmake/scripts/linux/ExtraTargets.cmake": "Unchanged from LibreELEC: skip extra targets in a headers-only build.",
+      "cmake/scripts/linux/Install.cmake": "Refreshed upstream for RC1: the pinned LibreELEC copy fuzzes onto RC1 and wraps the AddonHelpers.cmake and KodiConfig.cmake installs in if(NOT HEADERS_ONLY), breaking the host headers install."
+    }
+  },
+  "patches/kodi/kodi-9999-dv-display-reset.patch": {
+    "component": "kodi",
+    "summary": "Send a pending display reset from the DV and HDR10 bridge paths",
+    "files": {
+      "xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp": "PresentRender's bridge paths return before the stock display-reset dispatch; send a due reset there too, so VideoPlayer and ActiveAE leave the display-lost state after a mode change while DV or HDR10 conversion is presenting. Kodi 22.0 RC1's Flush(saveBuffers) keeps the DV frame across OnLostDisplay, which made this reachable."
+    }
   }
 }

@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 805b1bb..4c9aea9 100644
+index eba3ff8..bf3d5d6 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -5,6 +5,12 @@ endif()
@@ -122,7 +122,7 @@ index d58b3fc..32d82a0 100644
    bool hasDisplayMetadata = false;
    AVMasteringDisplayMetadata displayMetadata;
 diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.cpp b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.cpp
-index a7d4d30..ca51698 100644
+index a7d4d303..ca51698 100644
 --- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.cpp
 +++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.cpp
 @@ -29,6 +29,16 @@
@@ -374,7 +374,7 @@ index 121fc36..5103cc1 100644
    vaapiFramesCtx->nb_surfaces = m_videoSurfaces.Size();
    VASurfaceID *surfaceIds = (VASurfaceID*)av_malloc(vaapiFramesCtx->nb_surfaces *  sizeof(VASurfaceID));
 diff --git a/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemux.h b/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemux.h
-index 96ba1c1..23751c9 100644
+index 9d71b2e..c256e06 100644
 --- a/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemux.h
 +++ b/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemux.h
 @@ -179,6 +179,9 @@ public:
@@ -388,10 +388,10 @@ index 96ba1c1..23751c9 100644
  
  class CDemuxStreamAudio : public CDemuxStream
 diff --git a/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp b/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp
-index bcbc361..4c79951 100644
+index bc5186d..e3cc4b2 100644
 --- a/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp
 +++ b/xbmc/cores/VideoPlayer/DVDDemuxers/DVDDemuxFFmpeg.cpp
-@@ -1766,10 +1766,16 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int streamIdx)
+@@ -1974,10 +1974,16 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int streamIdx)
            sideData =
                av_packet_side_data_get(pStream->codecpar->coded_side_data,
                                        pStream->codecpar->nb_coded_side_data, AV_PKT_DATA_DOVI_CONF);
@@ -469,7 +469,7 @@ index 1da58a7..ca706b9 100644
    // AUDIO
    int channels;
 diff --git a/xbmc/cores/VideoPlayer/VideoPlayer.cpp b/xbmc/cores/VideoPlayer/VideoPlayer.cpp
-index f916386..60073be 100644
+index 44e6e72..3b7c5b4 100644
 --- a/xbmc/cores/VideoPlayer/VideoPlayer.cpp
 +++ b/xbmc/cores/VideoPlayer/VideoPlayer.cpp
 @@ -7,6 +7,9 @@
@@ -482,7 +482,7 @@ index f916386..60073be 100644
  
  #include "DVDCodecs/DVDCodecUtils.h"
  #include "DVDDemuxers/DVDDemux.h"
-@@ -4366,9 +4369,14 @@ bool CVideoPlayer::OpenVideoStream(CDVDStreamInfo& hint, bool reset)
+@@ -4452,9 +4455,14 @@ bool CVideoPlayer::OpenVideoStream(CDVDStreamInfo& hint, bool reset)
                                                     (double)DVD_TIME_BASE * hint.fpsscale /
                                                     (hint.fpsrate * (hint.interlaced ? 2 : 1)));
  
@@ -619,7 +619,7 @@ index 7ace6ef..a3bb324 100644
  
    // textures
 diff --git a/xbmc/cores/VideoPlayer/VideoRenderers/LinuxRendererGL.cpp b/xbmc/cores/VideoPlayer/VideoRenderers/LinuxRendererGL.cpp
-index 6530438..ceeff54 100644
+index 3be87a6..15597df 100644
 --- a/xbmc/cores/VideoPlayer/VideoRenderers/LinuxRendererGL.cpp
 +++ b/xbmc/cores/VideoPlayer/VideoRenderers/LinuxRendererGL.cpp
 @@ -308,6 +308,9 @@ void CLinuxRendererGL::AddVideoPicture(const VideoPicture &picture, int index)
@@ -642,7 +642,7 @@ index 6530438..ceeff54 100644
    {
      buf.videoBuffer->Release();
 diff --git a/xbmc/cores/VideoPlayer/VideoRenderers/LinuxRendererGL.h b/xbmc/cores/VideoPlayer/VideoRenderers/LinuxRendererGL.h
-index 9495fc1..41b48bd 100644
+index c051e7a..b8aa50f 100644
 --- a/xbmc/cores/VideoPlayer/VideoRenderers/LinuxRendererGL.h
 +++ b/xbmc/cores/VideoPlayer/VideoRenderers/LinuxRendererGL.h
 @@ -203,6 +203,8 @@ protected:
@@ -655,7 +655,7 @@ index 9495fc1..41b48bd 100644
  
    // YUV decoder textures
 diff --git a/xbmc/cores/VideoPlayer/VideoRenderers/LinuxRendererGLES.cpp b/xbmc/cores/VideoPlayer/VideoRenderers/LinuxRendererGLES.cpp
-index 3901a42..5916e7c 100644
+index 2762bc3..0990864 100644
 --- a/xbmc/cores/VideoPlayer/VideoRenderers/LinuxRendererGLES.cpp
 +++ b/xbmc/cores/VideoPlayer/VideoRenderers/LinuxRendererGLES.cpp
 @@ -29,6 +29,9 @@
@@ -731,7 +731,7 @@ index 3901a42..5916e7c 100644
    if (buf.videoBuffer)
    {
      buf.videoBuffer->Release();
-@@ -1050,6 +1091,20 @@ void CLinuxRendererGLES::UnInit()
+@@ -1065,6 +1106,20 @@ void CLinuxRendererGLES::UnInit()
  
    glFinish();
  
@@ -752,7 +752,7 @@ index 3901a42..5916e7c 100644
    // YUV textures
    for (int i = 0; i < NUM_BUFFERS; ++i)
    {
-@@ -1156,6 +1211,14 @@ bool CLinuxRendererGLES::Render(unsigned int flags, int index)
+@@ -1171,6 +1226,14 @@ bool CLinuxRendererGLES::Render(unsigned int flags, int index)
      return false;
    }
  
@@ -768,7 +768,7 @@ index 3901a42..5916e7c 100644
    {
      ;
 diff --git a/xbmc/cores/VideoPlayer/VideoRenderers/LinuxRendererGLES.h b/xbmc/cores/VideoPlayer/VideoRenderers/LinuxRendererGLES.h
-index 8f59444..6c3ab8f 100644
+index f719b5a..5637f23 100644
 --- a/xbmc/cores/VideoPlayer/VideoRenderers/LinuxRendererGLES.h
 +++ b/xbmc/cores/VideoPlayer/VideoRenderers/LinuxRendererGLES.h
 @@ -132,6 +132,11 @@ protected:
@@ -796,7 +796,7 @@ index 8f59444..6c3ab8f 100644
  
    // YUV decoder textures
 diff --git a/xbmc/cores/VideoPlayer/VideoRenderers/RenderManager.cpp b/xbmc/cores/VideoPlayer/VideoRenderers/RenderManager.cpp
-index 793694d..3c24554 100644
+index 1bbe704..36a2b88 100644
 --- a/xbmc/cores/VideoPlayer/VideoRenderers/RenderManager.cpp
 +++ b/xbmc/cores/VideoPlayer/VideoRenderers/RenderManager.cpp
 @@ -30,6 +30,10 @@
@@ -1134,7 +1134,7 @@ index 8ff2262..63e2304 100644
  
      /**
 diff --git a/xbmc/windowing/gbm/WinSystemGbm.cpp b/xbmc/windowing/gbm/WinSystemGbm.cpp
-index 83e2085..08ec61d 100644
+index 28c9eb0..a0254e2 100644
 --- a/xbmc/windowing/gbm/WinSystemGbm.cpp
 +++ b/xbmc/windowing/gbm/WinSystemGbm.cpp
 @@ -14,6 +14,9 @@
@@ -1230,7 +1230,7 @@ index 83e2085..08ec61d 100644
  void CWinSystemGbm::FlipPage(bool rendered, bool videoLayer, bool async)
  {
    if (m_videoLayerBridge && !videoLayer)
-@@ -629,5 +684,8 @@ CHDRCapabilities CWinSystemGbm::GetDisplayHDRCapabilities() const
+@@ -636,5 +691,8 @@ CHDRCapabilities CWinSystemGbm::GetDisplayHDRCapabilities() const
    if (m_info->SupportsEOTF(UTILS::Eotf::HLG))
      caps.SetHLG();
  
@@ -1300,10 +1300,10 @@ index 1580be9..d382c87 100644
    EGLint m_renderableType{0};
  
 diff --git a/xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp b/xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp
-index 74c991b..9666cb8 100644
+index 08eb0a6..757dac2 100644
 --- a/xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp
 +++ b/xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp
-@@ -36,6 +36,14 @@ extern "C"
+@@ -37,6 +37,14 @@ extern "C"
  #include "windowing/WindowSystemFactory.h"
  
  #include <mutex>
@@ -1318,7 +1318,7 @@ index 74c991b..9666cb8 100644
  
  #include <gbm.h>
  
-@@ -113,6 +121,11 @@ bool CWinSystemGbmGLESContext::SetFullScreen(bool fullScreen,
+@@ -115,6 +123,11 @@ bool CWinSystemGbmGLESContext::SetFullScreen(bool fullScreen,
                                               RESOLUTION_INFO& res,
                                               bool blankOtherDisplays)
  {
@@ -1330,7 +1330,7 @@ index 74c991b..9666cb8 100644
    if (res.iWidth != m_nWidth || res.iHeight != m_nHeight)
    {
      CLog::Log(LOGDEBUG, "CWinSystemGbmGLESContext::{} - resolution changed, creating a new window",
-@@ -137,6 +150,27 @@ void CWinSystemGbmGLESContext::PresentRender(bool rendered, bool videoLayer)
+@@ -139,6 +152,27 @@ void CWinSystemGbmGLESContext::PresentRender(bool rendered, bool videoLayer)
    if (!m_bRenderCreated)
      return;
  
@@ -1358,7 +1358,7 @@ index 74c991b..9666cb8 100644
    if (rendered || videoLayer)
    {
      bool async = !videoLayer && m_eglFence;
-@@ -201,7 +235,11 @@ bool CWinSystemGbmGLESContext::SetGuiCompositing(int colorTransfer)
+@@ -203,7 +237,11 @@ bool CWinSystemGbmGLESContext::SetGuiCompositing(int colorTransfer)
      if (!m_compositeShader)
      {
        std::string defines;
@@ -1371,7 +1371,7 @@ index 74c991b..9666cb8 100644
          defines += "#define KODI_LIMITED_RANGE 1\n";
        m_compositeShader = std::make_unique<CGuiCompositeShaderGLES>(defines);
        if (!m_compositeShader->CompileAndLink())
-@@ -359,6 +397,27 @@ void CWinSystemGbmGLESContext::CompositeGui()
+@@ -361,6 +399,27 @@ void CWinSystemGbmGLESContext::CompositeGui()
        m_DRM->GetGuiPlane() != nullptr)
      return;
  
@@ -1399,7 +1399,7 @@ index 74c991b..9666cb8 100644
    glActiveTexture(GL_TEXTURE0);
    glBindTexture(GL_TEXTURE_2D, m_guiFbo.Texture());
  
-@@ -378,7 +437,19 @@ void CWinSystemGbmGLESContext::CompositeGui()
+@@ -380,7 +439,19 @@ void CWinSystemGbmGLESContext::CompositeGui()
    float w = static_cast<float>(m_guiFboWidth);
    float h = static_cast<float>(m_guiFboHeight);
  
@@ -1419,7 +1419,7 @@ index 74c991b..9666cb8 100644
  
    m_compositeShader->SetProjection(proj);
    m_compositeShader->Enable();
-@@ -401,8 +472,130 @@ void CWinSystemGbmGLESContext::CompositeGui()
+@@ -403,8 +474,130 @@ void CWinSystemGbmGLESContext::CompositeGui()
    glDisableVertexAttribArray(texLoc);
  
    m_compositeShader->Disable();

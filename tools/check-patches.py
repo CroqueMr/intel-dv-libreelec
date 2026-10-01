@@ -9,7 +9,7 @@ import tarfile
 
 SOURCES = {
     'linux': ('linux-7.2.6.tar.xz', '039aef84f2b0994aeda3f4fcfc3d02ec9d7a9bbb9020ea264c43f446c860f606'),
-    'kodi': ('kodi-b7afba240133a570145466cfaf6a6825f84c6ad1.tar.gz', '0b01a5168764cd95930f294bd0e9f19f8b160577d8d20b58538f4cb99ea98f78'),
+    'kodi': ('kodi-28ea2eac1eb7af8fdcbd2672d933ce87f594be79.tar.gz', '34ef5ef2345763588c17f1d2065d63ada4f6016d249a47f8c98ee3c64efaedb4'),
     'ffmpeg': ('ffmpeg-9.0.tar.xz', '7f607a00dd0d28a729d5a4811205812eef01cf6ef6155025febb6f36a9062d52'),
     'libplacebo': ('libplacebo-e2972fdd09adacd383656738d7d280f0cd84a761.tar.gz', '2dc029b7686455054fb5e76dd8c084cbf4fa4159f33364c5b7f9afc8b3611811'),
 }

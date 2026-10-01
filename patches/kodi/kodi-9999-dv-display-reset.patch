@@ -1,0 +1,44 @@
+diff --git a/xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp b/xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp
+index b8771b1..435996c 100644
+--- a/xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp
++++ b/xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp
+@@ -158,6 +158,23 @@ void CWinSystemGbmGLESContext::PresentRender(bool rendered, bool videoLayer)
+     return;
+ 
+ #ifdef HAVE_DVBRIDGE
++  // The bridge paths below return before the display reset at the end of this function. A
++  // pending reset is still due once its delay has passed: without it VideoPlayer and ActiveAE
++  // stay in their display-lost state while the bridge keeps presenting the held frame.
++  const auto sendPendingDisplayReset = [this]()
++  {
++    if (m_dispReset && m_dispResetTimer.IsTimePast())
++    {
++      CLog::Log(LOGDEBUG,
++                "CWinSystemGbmGLESContext::PresentRender - Sending display reset to all clients");
++      m_dispReset = false;
++      std::unique_lock lock(m_resourceSection);
++
++      for (auto resource : m_resources)
++        resource->OnResetDisplay();
++    }
++  };
++
+   if (m_hdrConversion)
+   {
+     bool presented = false;
+@@ -176,6 +193,7 @@ void CWinSystemGbmGLESContext::PresentRender(bool rendered, bool videoLayer)
+     if (m_dvBridge)
+       m_dvBridge->Presented(presented);
+     m_dvFrame = false;
++    sendPendingDisplayReset();
+     return;
+   }
+   if (m_dvState.Captured())
+@@ -194,6 +212,7 @@ void CWinSystemGbmGLESContext::PresentRender(bool rendered, bool videoLayer)
+     if (m_dvBridge)
+       m_dvBridge->Presented(presented);
+     m_dvFrame = false;
++    sendPendingDisplayReset();
+     return;
+   }
+ #endif

@@ -68,11 +68,10 @@
  }
  
 -void dvbridge_fel_reset(struct dvbridge_fel *f)
--{
++static void clear_queues(struct dvbridge_fel *f)
+ {
 -    if (!f)
 -        return;
-+static void clear_queues(struct dvbridge_fel *f)
-+{
      for (unsigned i = 0; i < f->num_packets; ++i)
          av_packet_free(&f->packets[i]);
      for (unsigned i = 0; i < f->num_frames; ++i)
@@ -160,7 +159,7 @@
      return f;
  fail:
      dvbridge_fel_destroy(f);
-@@ -110,11 +188,19 @@
+@@ -110,12 +188,20 @@
                  f->eof = true;
              return result == AVERROR(EAGAIN) || result == AVERROR_EOF;
          }
@@ -174,15 +173,16 @@
 +        if (frame->format != AV_PIX_FMT_VAAPI || frame->pts == AV_NOPTS_VALUE) {
              av_frame_free(&frame);
              return false;
-+        }
+         }
 +        for (unsigned i = 0; i < f->num_frames; ++i) {
 +            if (f->frames[i]->pts == frame->pts) {
 +                av_frame_free(&frame);
 +                return false;
 +            }
-         }
++        }
          f->frames[f->num_frames++] = frame;
      }
+     return true;
 @@ -131,15 +217,29 @@
          goto fail;
      while (f->num_packets && f->num_frames < QUEUE_MAX) {
@@ -234,7 +234,7 @@
      AVPacket *copy = av_packet_clone(packet);
      if (!copy)
          goto fail;
-@@ -198,9 +307,32 @@
+@@ -198,10 +307,33 @@
              goto fail;
          }
          if (f->num_packets == QUEUE_MAX || copy->size <= 0 ||
@@ -243,7 +243,7 @@
 +            !picture_identity(&f->enhancement_order, copy, &f->packet_order[f->num_packets])) {
              av_packet_free(&copy);
              goto fail;
-+        }
+         }
 +        if (f->synchronizing) {
 +            const AVCodecParserContext *bp = f->base_order.parser;
 +            const AVCodecParserContext *ep = f->enhancement_order.parser;
@@ -265,9 +265,10 @@
 +            f->packet_order[f->num_packets] = base_identity;
 +            f->anchor_pts = packet->pts;
 +            f->synchronizing = false;
-         }
++        }
          f->packet_bytes += copy->size;
          f->packets[f->num_packets++] = copy;
+     }
 @@ -214,6 +346,10 @@
  {
      if (!f)
@@ -436,43 +437,50 @@
  #include "DVDInputStreams/DVDInputStream.h"
  #ifdef HAVE_LIBBLURAY
  #include "DVDInputStreams/DVDInputStreamBluray.h"
-@@ -1349,6 +1357,36 @@
-   int ret;
-   {
-     std::unique_lock lock(m_critSection);
-+#ifdef HAVE_DVBRIDGE
-+    // Only the native dual-layer DV path needs enhancement preroll. Keep the
-+    // requested startpts below unchanged so Kodi discards preroll normally.
-+    if (!m_checkTransportStream && m_seekStream == -1)
+@@ -1410,8 +1418,43 @@
+       ret = -1;
+     }
+     else
 +    {
-+      for (const auto& [id, stream] : m_streams)
++      // The FEL preroll runs only when a seek actually happens: skipSeek and beyondEof above
++      // are decided on the requested target, so a seek past the end still skips the scan and
++      // forces EOF instead of probing for an enhancement-layer anchor.
++#ifdef HAVE_DVBRIDGE
++      // Only the native dual-layer DV path needs enhancement preroll. Keep the
++      // requested startpts below unchanged so Kodi discards preroll normally.
++      if (!m_checkTransportStream && m_seekStream == -1)
 +      {
-+        if (stream->type != StreamType::VIDEO || id < 0 ||
-+            static_cast<unsigned>(id) >= m_pFormatContext->nb_streams)
-+          continue;
-+        CDVDStreamInfo hints(*stream);
-+        if (hints.dovi.dv_profile != 7 || !hints.dovi.el_present_flag ||
-+            !DVBRIDGE::WantsNativeOutput(hints))
-+          continue;
-+        AVStream* video = m_pFormatContext->streams[id];
-+        const int64_t target = av_rescale_q(seek_pts, AV_TIME_BASE_Q, video->time_base);
-+        const int64_t anchor = dvbridge_fel_seek_point(m_pFormatContext, id, target);
-+        if (anchor != AV_NOPTS_VALUE)
++        for (const auto& [id, stream] : m_streams)
 +        {
-+          seek_pts = av_rescale_q(anchor, video->time_base, AV_TIME_BASE_Q);
-+          backwards = true;
-+          CLog::Log(LOGDEBUG, "DV FEL: random-access preroll begins at {} us for {} ms seek",
-+                    seek_pts, time);
++          if (stream->type != StreamType::VIDEO || id < 0 ||
++              static_cast<unsigned>(id) >= m_pFormatContext->nb_streams)
++            continue;
++          CDVDStreamInfo hints(*stream);
++          if (hints.dovi.dv_profile != 7 || !hints.dovi.el_present_flag ||
++              !DVBRIDGE::WantsNativeOutput(hints))
++            continue;
++          AVStream* video = m_pFormatContext->streams[id];
++          const int64_t target = av_rescale_q(seek_pts, AV_TIME_BASE_Q, video->time_base);
++          const int64_t anchor = dvbridge_fel_seek_point(m_pFormatContext, id, target);
++          if (anchor != AV_NOPTS_VALUE)
++          {
++            seek_pts = av_rescale_q(anchor, video->time_base, AV_TIME_BASE_Q);
++            backwards = true;
++            CLog::Log(LOGDEBUG, "DV FEL: random-access preroll begins at {} us for {} ms seek",
++                      seek_pts, time);
++          }
++          else
++            CLog::Log(LOGWARNING, "DV FEL: no common random-access point in bounded seek probe");
++          break;
 +        }
-+        else
-+          CLog::Log(LOGWARNING, "DV FEL: no common random-access point in bounded seek probe");
-+        break;
 +      }
-+    }
 +#endif
-     ret = av_seek_frame(m_pFormatContext, m_seekStream, seek_pts, backwards ? AVSEEK_FLAG_BACKWARD : 0);
+       ret = av_seek_frame(m_pFormatContext, m_seekStream, seek_pts,
+                           backwards ? AVSEEK_FLAG_BACKWARD : 0);
++    }
  
      if (ret < 0)
+     {
 --- a/xbmc/cores/VideoPlayer/DVDDemuxers/CMakeLists.txt
 +++ b/xbmc/cores/VideoPlayer/DVDDemuxers/CMakeLists.txt
 @@ -34,3 +34,6 @@

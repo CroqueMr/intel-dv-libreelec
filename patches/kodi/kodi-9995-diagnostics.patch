@@ -406,7 +406,7 @@
 +}
 --- a/xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp
 +++ b/xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp
-@@ -496,9 +496,15 @@
+@@ -498,9 +498,15 @@
  
  bool DVBRIDGE::WantsNativeOutput(const CDVDStreamInfo& stream)
  {
@@ -423,7 +423,7 @@
  }
  
  bool DVBRIDGE::WantsNativeOutput(const VideoPicture* picture)
-@@ -520,20 +526,28 @@
+@@ -522,20 +528,28 @@
  
  bool CWinSystemGbmGLESContext::BeginDVBridge()
  {
@@ -456,7 +456,7 @@
    m_compositeShader.reset();
    return SetGuiCompositing(AVCOL_TRC_SMPTE2084);
  }
-@@ -579,12 +593,18 @@
+@@ -581,12 +595,18 @@
      glFinish();
      if (!m_eglContext.TrySwapBuffers() || !FlipDVBridgePage(m_dvState, true))
      {
@@ -696,7 +696,7 @@
      FinishRequest(false);
      return false;
    }
-@@ -416,8 +505,48 @@
+@@ -416,10 +505,50 @@
  bool CDRMAtomic::AddProperty(CDRMObject* object, const char* name, uint64_t value)
  {
    const bool added = object && m_req && m_req->AddProperty(object, name, value);
@@ -708,8 +708,8 @@
 +    m_signalDirty = true;
    m_propertyFailure |= !added;
    return added;
-+}
-+
+ }
+ 
 +void CDRMAtomic::ReportSignalState()
 +{
 +  if (!m_connector || !m_crtc || !m_mode)
@@ -742,15 +742,15 @@
 +      "DVBridge signal committed: connector={} crtc={} dv={} hdr_blob={} colorspace={} max_bpc={} rgb={} mode={}x{} clock_khz={} totals={}x{} flags={} vscan={} active={}",
 +      state[0], state[1], state[2], state[3], state[4], state[5], state[6], state[7], state[8], state[9],
 +      state[10], state[11], state[12], state[13], state[14]);
- }
- 
- CDRMAtomic::CDRMAtomicRequest::CDRMAtomicRequest() : m_atomicRequest(drmModeAtomicAlloc())
-@@ -484,6 +613,27 @@
- {
-   CLog::LogF(LOGDEBUG, "DRM Atomic Request:");
-   LogAtomicRequest(LOGDEBUG, m_atomicRequestItems);
 +}
 +
+ CDRMAtomic::CDRMAtomicRequest::CDRMAtomicRequest() : m_atomicRequest(drmModeAtomicAlloc())
+ {
+ }
+@@ -486,6 +615,27 @@
+   LogAtomicRequest(LOGDEBUG, m_atomicRequestItems);
+ }
+ 
 +void CDRMAtomic::CDRMAtomicRequest::LogDVProperties()
 +{
 +  std::string message;
@@ -770,9 +770,11 @@
 +                   std::to_string(property.second);
 +    }
 +  CLog::Log(LOGINFO, "DVBridge requested properties (48 max):{}", message);
- }
- 
++}
++
  void CDRMAtomic::CDRMAtomicRequest::LogAtomicRequest(
+     uint8_t logLevel, std::map<CDRMObject*, std::map<uint32_t, uint64_t>>& atomicRequestItems)
+ {
 --- a/xbmc/windowing/gbm/drm/DRMAtomic.h
 +++ b/xbmc/windowing/gbm/drm/DRMAtomic.h
 @@ -11,8 +11,10 @@

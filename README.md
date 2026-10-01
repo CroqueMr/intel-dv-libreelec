@@ -6,7 +6,7 @@ An independent **LibreELEC Generic x86_64 community build**, using Kodi's own
 VideoPlayer, VAAPI decoder and GBM/GLES display path. **No external player, or proprietary Dolby SDK is required.**
 
 **R0.3.0.** Built on LibreELEC 13 development sources and
-Kodi 22 Beta 2, not on a stable LibreELEC release. Not affiliated with or
+Kodi 22 RC1, not on a stable LibreELEC release. Not affiliated with or
 certified by LibreELEC, Kodi, Dolby or Intel. Report this build's issues here,
 not to upstream projects unless reproduced with their unmodified releases.
 
@@ -27,7 +27,7 @@ See [release notes](docs/releases/0.3.0.md) and [conversion details](docs/OUTPUT
 | Linux / Intel display driver | 7.2.6 | 14 | Match Standard-DV signaling, protect byte-exact scanout, and require deep color for opt-in HDR10 conversion. |
 | FFmpeg | 9.0 | 3 | Preserve extended DV metadata and recognize DV AV1 container tags. |
 | libplacebo | 7.372.0, pinned commit | 9 | Preserve rendering precision, correct neutral FEL residual rounding and support an exact, lower-overhead GPU path. |
-| Kodi + shared DV renderer | 22.0 Beta 2, pinned commit | 5 | Reconstruct video layers, select Standard DV or L1-guided HDR10, and expose optional playback information. |
+| Kodi + shared DV renderer | 22.0 RC1, pinned commit | 5 | Reconstruct video layers, select Standard DV or L1-guided HDR10, and expose optional playback information. |
 | LibreELEC build recipes | 13.0-devel, pinned commit | 2 recipe overrides | Build and link the matching components. |
 | Mesa / Intel Media Driver / libva | 26.2.3 / 26.3.5 / 2.24.1 | 0 | Use the existing graphics and hardware-decoding stack. |
 | LibreELEC Settings | Pinned source | 0 | Unmodified. Playback preferences use Kodi's native settings. |

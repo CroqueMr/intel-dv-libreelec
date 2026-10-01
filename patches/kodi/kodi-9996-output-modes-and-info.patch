@@ -1,6 +1,6 @@
 --- a/addons/resource.language.en_gb/resources/strings.po
 +++ b/addons/resource.language.en_gb/resources/strings.po
-@@ -25700,3 +25700,48 @@
+@@ -25795,3 +25795,48 @@
  msgctxt "#40804"
  msgid "{0:.1f} dB"
  msgstr ""
@@ -659,17 +659,17 @@
 +} // namespace DVBRIDGE
 --- a/xbmc/cores/VideoPlayer/VideoPlayer.cpp
 +++ b/xbmc/cores/VideoPlayer/VideoPlayer.cpp
-@@ -7,6 +7,9 @@
-  */
+@@ -8,6 +8,9 @@
  
  #include "VideoPlayer.h"
-+#ifdef HAVE_DVBRIDGE
+ #ifdef HAVE_DVBRIDGE
 +#include "DVDCodecs/Video/DVOutputSettings.h"
 +#endif
- #ifdef HAVE_DVBRIDGE
++#ifdef HAVE_DVBRIDGE
  #include "cores/VideoPlayer/DVDCodecs/Video/DVPlaybackPolicy.h"
  #endif
-@@ -1391,6 +1394,9 @@
+ 
+@@ -1423,6 +1426,9 @@
  
  void CVideoPlayer::Prepare()
  {
@@ -707,11 +707,10 @@
    CLog::Log(LOGDEBUG, "CVideoPlayerVideo::OpenStream - open stream with codec: {}",
              avcodec_get_name(hint.codec));
  
-@@ -350,6 +362,15 @@
-     MsgQueueReturnCode ret = GetMessage(pMsg, timeout, iPriority);
+@@ -351,6 +363,15 @@
  
      onlyPrioMsgs = false;
-+
+ 
 +#ifdef HAVE_DVBRIDGE
 +    if (pMsg && (pMsg->IsType(CDVDMsg::GENERAL_RESYNC) ||
 +                 pMsg->IsType(CDVDMsg::GENERAL_RESET) ||
@@ -720,10 +719,11 @@
 +                 pMsg->IsType(CDVDMsg::PLAYER_SETSPEED)))
 +      ++m_diagnosticTransitions;
 +#endif
- 
++
      if (MSGQ_IS_ERROR(ret))
      {
-@@ -859,6 +880,39 @@
+       if (!m_messageQueue.ReceivedAbortRequest())
+@@ -860,6 +881,39 @@
  
  CVideoPlayerVideo::EOutputState CVideoPlayerVideo::OutputPicture(const VideoPicture* pPicture)
  {
@@ -992,11 +992,10 @@
  
  CGUIDialogPlayerProcessInfo::CGUIDialogPlayerProcessInfo(void)
      : CGUIDialog(WINDOW_DIALOG_PLAYER_PROCESS_INFO, "DialogPlayerProcessInfo.xml")
-@@ -18,6 +33,117 @@
- }
+@@ -19,6 +34,117 @@
  
  CGUIDialogPlayerProcessInfo::~CGUIDialogPlayerProcessInfo(void) = default;
-+
+ 
 +void CGUIDialogPlayerProcessInfo::OnInitWindow()
 +{
 +#ifdef HAVE_DVBRIDGE
@@ -1107,9 +1106,10 @@
 +  }
 +#endif
 +}
- 
++
  bool CGUIDialogPlayerProcessInfo::OnAction(const CAction &action)
  {
+   if (action.GetID() == ACTION_PLAYER_PROCESS_INFO)
 --- a/xbmc/dialogs/GUIDialogPlayerProcessInfo.h
 +++ b/xbmc/dialogs/GUIDialogPlayerProcessInfo.h
 @@ -9,6 +9,9 @@
@@ -1270,7 +1270,7 @@
 +}
 --- a/xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp
 +++ b/xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp
-@@ -25,6 +25,9 @@
+@@ -26,6 +26,9 @@
  extern "C"
  {
  #include <libavutil/pixfmt.h>
@@ -1280,7 +1280,7 @@
  }
  #include "utils/BufferObjectFactory.h"
  #include "utils/DMAHeapBufferObject.h"
-@@ -41,6 +44,8 @@
+@@ -42,6 +45,8 @@
  #ifdef HAVE_DVBRIDGE
  #include "ServiceBroker.h"
  #include "cores/VideoPlayer/DVDCodecs/Video/DVPlaybackPolicy.h"
@@ -1289,7 +1289,7 @@
  #include "cores/VideoPlayer/DVDStreamInfo.h"
  #include "drm/DRMAtomic.h"
  #endif
-@@ -151,6 +156,26 @@
+@@ -153,6 +158,26 @@
      return;
  
  #ifdef HAVE_DVBRIDGE
@@ -1316,7 +1316,7 @@
    if (m_dvState.Captured())
    {
      bool presented = false;
-@@ -237,7 +262,7 @@
+@@ -239,7 +264,7 @@
        std::string defines;
        if (UseLimitedColor()
  #ifdef HAVE_DVBRIDGE
@@ -1325,7 +1325,7 @@
  #endif
            )
          defines += "#define KODI_LIMITED_RANGE 1\n";
-@@ -400,7 +425,7 @@
+@@ -402,7 +427,7 @@
  #ifdef HAVE_DVBRIDGE
    GLint previousFramebuffer = 0;
    GLint previousViewport[4]{};
@@ -1334,7 +1334,7 @@
    if (dvComposite)
    {
      if (!m_dvFrame || !m_dvBridge)
-@@ -489,21 +514,30 @@
+@@ -491,21 +516,30 @@
    if (!source || software)
      return false;
    auto* window = dynamic_cast<CWinSystemGbmGLESContext*>(CServiceBroker::GetWinSystem());
@@ -1368,7 +1368,7 @@
    return eligible;
  }
  
-@@ -521,7 +555,70 @@
+@@ -523,7 +557,70 @@
  
  int CWinSystemGbmGLESContext::VideoOutputBitDepth(const VideoPicture* picture) const
  {
@@ -1440,7 +1440,7 @@
  }
  
  bool CWinSystemGbmGLESContext::BeginDVBridge()
-@@ -534,20 +631,27 @@
+@@ -536,20 +633,27 @@
            GetOutputBitDepth(), m_renderableType);
      return false;
    };
@@ -1472,19 +1472,18 @@
    m_compositeShader.reset();
    return SetGuiCompositing(AVCOL_TRC_SMPTE2084);
  }
-@@ -555,8 +659,9 @@
+@@ -557,8 +661,9 @@
  bool CWinSystemGbmGLESContext::SetVideoOutput(const VideoPicture* picture)
  {
    // Restore with the current surface before EGL replaces its buffers.
 -  if (m_dvState.Captured() && !EndDVBridge())
--    return false;
 +  if ((m_dvState.Captured() || m_hdrConversion) && !EndDVBridge())
-+    return false;
+     return false;
 +  m_dvBridge.reset();
    return CWinSystemGbmEGLContext::SetVideoOutput(picture);
  }
  
-@@ -578,9 +683,30 @@
+@@ -580,9 +685,30 @@
  
  bool CWinSystemGbmGLESContext::EndDVBridge()
  {
@@ -1516,7 +1515,7 @@
      return true;
    if (m_dvState.Captured())
    {
-@@ -602,6 +728,7 @@
+@@ -604,6 +730,7 @@
    }
    if (m_dvBridge)
      m_dvBridge->Reset();
