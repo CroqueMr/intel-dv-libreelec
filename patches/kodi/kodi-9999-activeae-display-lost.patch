@@ -1,0 +1,65 @@
+diff --git a/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.cpp b/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.cpp
+index b8fe8bf..7ea9201 100644
+--- a/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.cpp
++++ b/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.cpp
+@@ -405,6 +405,11 @@ void CActiveAE::StateMachine(int signal, Protocol *port, Message *msg)
+           return;
+         case CActiveAEControlProtocol::DISPLAYRESET:
+           return;
++        case CActiveAEControlProtocol::DISPLAYLOST:
++          // Only the configured states have a sink to suspend; elsewhere the caller (a display
++          // mode change, waiting synchronously) only needs the reply.
++          msg->Reply(CActiveAEControlProtocol::ACC);
++          return;
+         case CActiveAEControlProtocol::APPFOCUSED:
+           m_sink.m_controlPort.SendOutMessage(CSinkControlProtocol::APPFOCUSED, msg->data, sizeof(bool));
+           return;
+@@ -538,8 +543,26 @@ void CActiveAE::StateMachine(int signal, Protocol *port, Message *msg)
+           case CActiveAEControlProtocol::DEVICECHANGE:
+           case CActiveAEControlProtocol::DEFAULTDEVICECHANGE:
+           case CActiveAEControlProtocol::DEVICECOUNTCHANGE:
+-            if (m_extTimeout != 0ms)
++            // During a display mode change the HDMI device comes and goes; DISPLAYRESET
++            // re-enumerates and retries once the display is back.
++            if (m_extTimeout != 0ms && !m_extDisplayLost)
++            {
++              m_sink.EnumerateSinkList(true, "");
++              m_extErrorRetries = 0;
++              m_extTimeout = 0ms;
++            }
++            return;
++          case CActiveAEControlProtocol::DISPLAYLOST:
++            // The HDMI device goes away with the display, so retrying now only fails. Wait for
++            // DISPLAYRESET, but retry anyway if it never comes.
++            m_extDisplayLost = true;
++            m_extTimeout = 3s;
++            msg->Reply(CActiveAEControlProtocol::ACC);
++            return;
++          case CActiveAEControlProtocol::DISPLAYRESET:
++            if (m_extDisplayLost)
+             {
++              m_extDisplayLost = false;
+               m_sink.EnumerateSinkList(true, "");
+               m_extErrorRetries = 0;
+               m_extTimeout = 0ms;
+@@ -559,6 +582,7 @@ void CActiveAE::StateMachine(int signal, Protocol *port, Message *msg)
+         {
+         case CActiveAEControlProtocol::TIMEOUT:
+           m_extError = false;
++          m_extDisplayLost = false;
+           LoadSettings();
+           Configure();
+           if (!m_extError)
+diff --git a/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.h b/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.h
+index 599b679..6d3bc08 100644
+--- a/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.h
++++ b/xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.h
+@@ -355,6 +355,8 @@ protected:
+   std::chrono::milliseconds m_extTimeout;
+   bool m_extError;
+   unsigned int m_extErrorRetries{0};
++  // A display mode change is in progress: sink retries wait for DISPLAYRESET.
++  bool m_extDisplayLost{false};
+   // The last InitSink() failed: the sink must be opened again before the
+   // pipeline is configured against m_sinkFormat.
+   bool m_sinkInitFailed{false};

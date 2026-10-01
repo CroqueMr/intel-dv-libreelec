@@ -373,5 +373,13 @@
     "files": {
       "xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp": "PresentRender's bridge paths return before the stock display-reset dispatch; send a due reset there too, so VideoPlayer and ActiveAE leave the display-lost state after a mode change while DV or HDR10 conversion is presenting. Kodi 22.0 RC1's Flush(saveBuffers) keeps the DV frame across OnLostDisplay, which made this reachable."
     }
+  },
+  "patches/kodi/kodi-9999-activeae-display-lost.patch": {
+    "component": "kodi",
+    "summary": "Answer DISPLAYLOST in every audio engine state and hold sink retries during a display mode change",
+    "files": {
+      "xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.cpp": "States with no sink to suspend reply to DISPLAYLOST instead of leaving the display change to time out after 5 s. In the error state, sink retries and device-change re-enumeration wait for DISPLAYRESET (with a 3 s fallback) instead of reopening the HDMI device while it comes and goes.",
+      "xbmc/cores/AudioEngine/Engines/ActiveAE/ActiveAE.h": "Track a display mode change in progress while in the error state."
+    }
   }
 }
