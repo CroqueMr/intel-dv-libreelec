@@ -5,6 +5,7 @@
 - **Kodi 22.0 RC1:** the Kodi patches are rebased from 22.0 Beta 2 (`b7afba24`) to 22.0 RC1 (`28ea2eac`) and apply with no fuzz. Two needed real changes:
   - *Profile 7 FEL seek:* RC1 skips seeks past the end of a file. The FEL preroll now runs only when a seek actually happens, so a seek past the end still ends playback quickly instead of probing the file for an enhancement-layer anchor.
   - *Display reset while DV is presenting:* the DV and HDR10 paths now send a pending display reset (`kodi-9999`). RC1 keeps the current frame across a display reset, so after a mid-playback mode change the bridge started presenting again before the reset was sent, and video and audio could stay paused.
+- **One HDMI mode change per DV transition** (`kodi-9999-dv-single-modeset`): starting a DV title used to change the TV's mode twice (refresh rate, then Dolby Vision), and stopping did the same in reverse; each now does both in one change, so the TV re-syncs once. On the test VM, open to DV on screen went from about 1.1 s to 0.8 s and stop to menu from 1.1–1.9 s to 0.8 s, before the TV's own re-sync. HDR10 conversion stops keep two changes.
 - **LibreELEC `9902-headers-only.patch`:** carries LibreELEC master's refreshed copy. The pinned copy fuzzes onto RC1 and breaks the Kodi headers install that binary add-ons build against.
 - **Unchanged:** FFmpeg 9.0 still meets RC1's minimum for system FFmpeg. The audio sink retry (`kodi-9998`) is still needed; RC1 changes when the error state retries, not what the retry does.
 

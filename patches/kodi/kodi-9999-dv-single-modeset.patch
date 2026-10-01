@@ -1,0 +1,370 @@
+diff --git a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVPlaybackPolicy.h b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVPlaybackPolicy.h
+index 7f51490..c2ea10b 100644
+--- a/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVPlaybackPolicy.h
++++ b/xbmc/cores/VideoPlayer/DVDCodecs/Video/DVPlaybackPolicy.h
+@@ -16,4 +16,9 @@ constexpr bool Eligible(bool standardDVDisplay, bool transportAvailable,
+ 
+ bool WantsNativeOutput(const CDVDStreamInfo& stream);
+ bool WantsNativeOutput(const VideoPicture* picture);
++
++// Set around a refresh-rate switch made for a stream that will use native output, so the
++// window system can leave the mode change for the bridge's first commit (one HDMI change).
++void ExpectNativeOutput(bool expected);
++bool NativeOutputExpected();
+ } // namespace DVBRIDGE
+diff --git a/xbmc/cores/VideoPlayer/VideoPlayer.cpp b/xbmc/cores/VideoPlayer/VideoPlayer.cpp
+index d0637d9..5bd3f8e 100644
+--- a/xbmc/cores/VideoPlayer/VideoPlayer.cpp
++++ b/xbmc/cores/VideoPlayer/VideoPlayer.cpp
+@@ -4466,7 +4466,13 @@ bool CVideoPlayer::OpenVideoStream(CDVDStreamInfo& hint, bool reset)
+       nativeDV = DVBRIDGE::WantsNativeOutput(hint);
+ #endif
+       RESOLUTION res = CResolutionUtils::ChooseBestResolution(static_cast<float>(framerate), hint.width, hint.height, !hint.stereo_mode.empty(), nativeDV);
++#ifdef HAVE_DVBRIDGE
++      DVBRIDGE::ExpectNativeOutput(nativeDV);
++#endif
+       CServiceBroker::GetWinSystem()->GetGfxContext().SetVideoResolution(res, false);
++#ifdef HAVE_DVBRIDGE
++      DVBRIDGE::ExpectNativeOutput(false);
++#endif
+       m_renderManager.TriggerUpdateResolution(framerate, hint.width, hint.height, hint.stereo_mode,
+                                               nativeDV);
+     }
+diff --git a/xbmc/cores/VideoPlayer/VideoRenderers/LinuxRendererGLES.cpp b/xbmc/cores/VideoPlayer/VideoRenderers/LinuxRendererGLES.cpp
+index 0af7f8d..f51f439 100644
+--- a/xbmc/cores/VideoPlayer/VideoRenderers/LinuxRendererGLES.cpp
++++ b/xbmc/cores/VideoPlayer/VideoRenderers/LinuxRendererGLES.cpp
+@@ -1114,7 +1114,7 @@ void CLinuxRendererGLES::UnInit()
+   {
+     auto* window = dynamic_cast<KODI::WINDOWING::GBM::CWinSystemGbmGLESContext*>(
+         CServiceBroker::GetWinSystem());
+-    if (window && !window->EndDVBridge())
++    if (window && !window->EndDVBridgeAtStop())
+     {
+       CLog::Log(LOGERROR, "DVBridge: cannot restore output during renderer teardown");
+       return;
+diff --git a/xbmc/cores/VideoPlayer/VideoRenderers/RenderManager.cpp b/xbmc/cores/VideoPlayer/VideoRenderers/RenderManager.cpp
+index 36a2b88..7452e6c 100644
+--- a/xbmc/cores/VideoPlayer/VideoRenderers/RenderManager.cpp
++++ b/xbmc/cores/VideoPlayer/VideoRenderers/RenderManager.cpp
+@@ -822,7 +822,13 @@ void CRenderManager::UpdateResolution()
+       {
+         RESOLUTION res = CResolutionUtils::ChooseBestResolution(
+             m_fps, m_picture.iWidth, m_picture.iHeight, !m_picture.stereoMode.empty(), m_nativeDVRate);
++#ifdef HAVE_DVBRIDGE
++        DVBRIDGE::ExpectNativeOutput(m_nativeDVRate);
++#endif
+         CServiceBroker::GetWinSystem()->GetGfxContext().SetVideoResolution(res, false);
++#ifdef HAVE_DVBRIDGE
++        DVBRIDGE::ExpectNativeOutput(false);
++#endif
+         UpdateLatencyTweak();
+         if (m_pRenderer)
+           m_pRenderer->Update();
+diff --git a/xbmc/windowing/gbm/WinSystemGbm.cpp b/xbmc/windowing/gbm/WinSystemGbm.cpp
+index 00239c3..c7db5f7 100644
+--- a/xbmc/windowing/gbm/WinSystemGbm.cpp
++++ b/xbmc/windowing/gbm/WinSystemGbm.cpp
+@@ -294,7 +294,7 @@ bool CWinSystemGbm::SetFullScreen(bool fullScreen, RESOLUTION_INFO& res, bool bl
+   // This existing GBM synchronization is required for ordinary HDR as well;
+   // it does not set DV signaling or override Kodi's HDR/SDR policy.
+   if (result && std::dynamic_pointer_cast<CDRMAtomic>(m_DRM))
+-    FlipPage(true, false, false);
++    result = CompleteModeset();
+ 
+   auto delay =
+       std::chrono::milliseconds(CServiceBroker::GetSettingsComponent()->GetSettings()->GetInt(
+@@ -306,6 +306,12 @@ bool CWinSystemGbm::SetFullScreen(bool fullScreen, RESOLUTION_INFO& res, bool bl
+   return result;
+ }
+ 
++bool CWinSystemGbm::CompleteModeset()
++{
++  FlipPage(true, false, false);
++  return true;
++}
++
+ #ifdef HAVE_DVBRIDGE
+ bool CWinSystemGbm::SupportsNativeDVOutput() const
+ {
+diff --git a/xbmc/windowing/gbm/WinSystemGbm.h b/xbmc/windowing/gbm/WinSystemGbm.h
+index 335b3e6..21f531c 100644
+--- a/xbmc/windowing/gbm/WinSystemGbm.h
++++ b/xbmc/windowing/gbm/WinSystemGbm.h
+@@ -89,6 +89,8 @@ public:
+ 
+ protected:
+   void OnLostDevice();
++  // Commits the mode SetFullScreen() just selected; a subclass may carry it in its own commit.
++  virtual bool CompleteModeset();
+ 
+   std::unique_ptr<CVideoSync> GetVideoSync(CVideoReferenceClock* clock) override;
+ 
+diff --git a/xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp b/xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp
+index 435996c..db24790 100644
+--- a/xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp
++++ b/xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp
+@@ -49,6 +49,12 @@ extern "C"
+ #include "cores/VideoPlayer/DVDCodecs/Video/DVStreamTelemetry.h"
+ #include "cores/VideoPlayer/DVDStreamInfo.h"
+ #include "drm/DRMAtomic.h"
++#include "settings/DisplaySettings.h"
++#include "settings/Settings.h"
++#include "settings/SettingsComponent.h"
++#include "windowing/GraphicContext.h"
++
++#include <atomic>
+ #endif
+ 
+ #include <gbm.h>
+@@ -128,10 +134,24 @@ bool CWinSystemGbmGLESContext::SetFullScreen(bool fullScreen,
+                                              RESOLUTION_INFO& res,
+                                              bool blankOtherDisplays)
+ {
++  bool swap = true;
+ #ifdef HAVE_DVBRIDGE
+-  if (!EndDVBridge())
+-    return false;
+-  m_dvBridge.reset();
++  // One HDMI change per transition, when the raster size stays the same: a DV stop held for
++  // this refresh restore restores its signal in this mode change, and a refresh switch for a
++  // stream that will use native output leaves the mode to the bridge's first commit. Both
++  // happen in CompleteModeset().
++  const bool sameSize = res.iWidth == m_nWidth && res.iHeight == m_nHeight;
++  m_dvRestoreWithModeset = m_dvExitPending && sameSize;
++  m_dvExitPending = false;
++  if (!m_dvRestoreWithModeset)
++  {
++    if (!EndDVBridge())
++      return false;
++    m_dvBridge.reset();
++  }
++  m_dvModesetDeferred = !m_dvRestoreWithModeset && sameSize && res.iWidth == 3840 &&
++                        res.iHeight == 2160 && DVBRIDGE::NativeOutputExpected();
++  swap = !m_dvRestoreWithModeset && !m_dvModesetDeferred;
+ #endif
+   if (res.iWidth != m_nWidth || res.iHeight != m_nHeight)
+   {
+@@ -140,7 +160,7 @@ bool CWinSystemGbmGLESContext::SetFullScreen(bool fullScreen,
+     CreateNewWindow("", fullScreen, res);
+   }
+ 
+-  if (!m_eglContext.TrySwapBuffers())
++  if (swap && !m_eglContext.TrySwapBuffers())
+   {
+     CEGLUtils::Log(LOGERROR, "eglSwapBuffers failed");
+     throw std::runtime_error("eglSwapBuffers failed");
+@@ -175,6 +195,23 @@ void CWinSystemGbmGLESContext::PresentRender(bool rendered, bool videoLayer)
+     }
+   };
+ 
++  if (m_dvExitPending)
++  {
++    if (!m_dvExitDeadline.IsTimePast())
++    {
++      // Hold the last DV frame until the refresh restore: GUI pixels must never be scanned
++      // out under the DV signal.
++      KODI::TIME::Sleep(10ms);
++      sendPendingDisplayReset();
++      return;
++    }
++    CLog::Log(LOGINFO, "DVBridge: no refresh restore followed the stop, restoring the signal alone");
++    if (EndDVBridge())
++      m_dvBridge.reset();
++    sendPendingDisplayReset();
++    return;
++  }
++
+   if (m_hdrConversion)
+   {
+     bool presented = false;
+@@ -193,6 +230,8 @@ void CWinSystemGbmGLESContext::PresentRender(bool rendered, bool videoLayer)
+     if (m_dvBridge)
+       m_dvBridge->Presented(presented);
+     m_dvFrame = false;
++    if (presented)
++      m_dvModesetDeferred = false;
+     sendPendingDisplayReset();
+     return;
+   }
+@@ -212,9 +251,25 @@ void CWinSystemGbmGLESContext::PresentRender(bool rendered, bool videoLayer)
+     if (m_dvBridge)
+       m_dvBridge->Presented(presented);
+     m_dvFrame = false;
++    if (presented)
++      m_dvModesetDeferred = false;
+     sendPendingDisplayReset();
+     return;
+   }
++
++  if (m_dvModesetDeferred)
++  {
++    if (!m_dvModesetDeadline.IsTimePast())
++    {
++      // The selected mode waits for the bridge's first commit; a GUI flip would commit it now
++      // and make the TV change mode twice.
++      KODI::TIME::Sleep(10ms);
++      sendPendingDisplayReset();
++      return;
++    }
++    m_dvModesetDeferred = false;
++    CLog::Log(LOGINFO, "DVBridge: native output did not start, committing the refresh change alone");
++  }
+ #endif
+ 
+   if (rendered || videoLayer)
+@@ -562,6 +617,21 @@ bool DVBRIDGE::WantsNativeOutput(const CDVDStreamInfo& stream)
+   return eligible;
+ }
+ 
++namespace
++{
++std::atomic<bool> nativeOutputExpected{false};
++} // namespace
++
++void DVBRIDGE::ExpectNativeOutput(bool expected)
++{
++  nativeOutputExpected = expected;
++}
++
++bool DVBRIDGE::NativeOutputExpected()
++{
++  return nativeOutputExpected.load();
++}
++
+ bool DVBRIDGE::WantsNativeOutput(const VideoPicture* picture)
+ {
+   return picture && NativeDVEligible(picture->doviMetadata.Data() != nullptr, false,
+@@ -679,10 +749,17 @@ bool CWinSystemGbmGLESContext::BeginDVBridge()
+ 
+ bool CWinSystemGbmGLESContext::SetVideoOutput(const VideoPicture* picture)
+ {
+-  // Restore with the current surface before EGL replaces its buffers.
+-  if ((m_dvState.Captured() || m_hdrConversion) && !EndDVBridge())
+-    return false;
+-  m_dvBridge.reset();
++  // A stop held for the refresh restore (EndDVBridgeAtStop) keeps the signal through renderer
++  // teardown while the surface keeps its depth; it is restored in the refresh change.
++  const bool keepHeldStop =
++      m_dvExitPending && !picture && VideoOutputBitDepth(picture) == GetOutputBitDepth();
++  if (!keepHeldStop)
++  {
++    // Restore with the current surface before EGL replaces its buffers.
++    if ((m_dvState.Captured() || m_hdrConversion) && !EndDVBridge())
++      return false;
++    m_dvBridge.reset();
++  }
+   return CWinSystemGbmEGLContext::SetVideoOutput(picture);
+ }
+ 
+@@ -698,12 +775,15 @@ bool CWinSystemGbmGLESContext::RenderDVBridge(const CDVBridgeGLES::Layer& layer,
+     return false;
+   const bool overlayFree = m_guiWillRender && GetGUIElementCount() == 0 && !m_dvOverlays;
+   m_dvFrame = m_dvBridge->PrepareHardware(layer, enhancement, metadata, geometry, overlayFree);
++  if (m_dvFrame)
++    m_dvExitPending = false;
+   glBindFramebuffer(GL_FRAMEBUFFER, 0);
+   return m_dvFrame;
+ }
+ 
+ bool CWinSystemGbmGLESContext::EndDVBridge()
+ {
++  m_dvExitPending = false;
+   if (m_hdrDeepColorPrevious)
+   {
+     auto drm = std::dynamic_pointer_cast<CDRMAtomic>(m_DRM);
+@@ -757,6 +837,56 @@ bool CWinSystemGbmGLESContext::EndDVBridge()
+   return true;
+ }
+ 
++bool CWinSystemGbmGLESContext::EndDVBridgeAtStop()
++{
++  // Kodi restores the desktop refresh rate right after a stop when it switched for the video.
++  // Keep the DV signal (and the last frame) until then, so the restore is one HDMI change.
++  // Only Standard DV: HDR10 conversion keeps its deep-colour policy, which a later
++  // ConfigureHDR10Conversion() would record as the value to restore.
++  if (m_dvState.Captured() && !m_hdrConversion)
++  {
++    auto& gfx = GetGfxContext();
++    const RESOLUTION desktop = CDisplaySettings::GetInstance().GetCurrentResolution();
++    const auto& desktopInfo = CDisplaySettings::GetInstance().GetResolutionInfo(desktop);
++    const bool restoreExpected =
++        CServiceBroker::GetSettingsComponent()->GetSettings()->GetInt(
++            CSettings::SETTING_VIDEOPLAYER_ADJUSTREFRESHRATE) != ADJUST_REFRESHRATE_OFF &&
++        gfx.GetVideoResolution() != desktop && desktopInfo.iWidth == m_nWidth &&
++        desktopInfo.iHeight == m_nHeight;
++    if (restoreExpected)
++    {
++      m_dvExitPending = true;
++      m_dvExitDeadline.Set(2500ms);
++      m_dvFrame = false;
++      CLog::Log(LOGINFO, "DVBridge: keeping the signal for the refresh restore");
++      return true;
++    }
++  }
++  return EndDVBridge();
++}
++
++bool CWinSystemGbmGLESContext::CompleteModeset()
++{
++  if (m_dvRestoreWithModeset)
++  {
++    m_dvRestoreWithModeset = false;
++    // The restore commit carries the mode SetFullScreen() selected.
++    if (!EndDVBridge())
++      return false;
++    m_dvBridge.reset();
++    CLog::Log(LOGINFO, "DVBridge: signal restored in the refresh change");
++    return true;
++  }
++  if (m_dvModesetDeferred)
++  {
++    // The bridge's first commit carries the mode (see PresentRender).
++    m_dvModesetDeadline.Set(3000ms);
++    CLog::Log(LOGINFO, "DVBridge: refresh change left to the first native frame");
++    return true;
++  }
++  return CWinSystemGbm::CompleteModeset();
++}
++
+ bool CWinSystemGbmGLESContext::DestroyWindowSystem()
+ {
+   if (!EndDVBridge())
+diff --git a/xbmc/windowing/gbm/WinSystemGbmGLESContext.h b/xbmc/windowing/gbm/WinSystemGbmGLESContext.h
+index 9292f77..2ee01e5 100644
+--- a/xbmc/windowing/gbm/WinSystemGbmGLESContext.h
++++ b/xbmc/windowing/gbm/WinSystemGbmGLESContext.h
+@@ -63,6 +63,9 @@ public:
+                        const CDVMetadataBuffer& metadata,
+                        dvbridge_geometry geometry);
+   bool EndDVBridge();
++  // Renderer teardown: when a refresh-rate restore is about to follow, the DV signal is
++  // restored in that mode change instead of in a separate one.
++  bool EndDVBridgeAtStop();
+   bool SetVideoOutput(const VideoPicture* picture) override;
+   bool DestroyWindowSystem() override;
+ #endif
+@@ -73,6 +76,7 @@ protected:
+   bool CreateContext() override;
+ #ifdef HAVE_DVBRIDGE
+   int VideoOutputBitDepth(const VideoPicture* picture) const override;
++  bool CompleteModeset() override;
+ #endif
+ 
+ private:
+@@ -94,6 +98,15 @@ private:
+   bool m_hdrConversion = false;
+   std::optional<uint64_t> m_hdrDeepColorPrevious;
+   bool m_dvOverlays = true;
++  // One HDMI change per transition: a refresh switch for native output leaves its mode set
++  // pending for the bridge's first commit (m_dvModesetDeferred), and a DV stop that a refresh
++  // restore will follow keeps the signal until that mode change (m_dvExitPending). Both give
++  // up at their deadline and fall back to separate commits.
++  bool m_dvModesetDeferred = false;
++  XbmcThreads::EndTime<> m_dvModesetDeadline;
++  bool m_dvExitPending = false;
++  bool m_dvRestoreWithModeset = false;
++  XbmcThreads::EndTime<> m_dvExitDeadline;
+ #endif
+ };
+ 

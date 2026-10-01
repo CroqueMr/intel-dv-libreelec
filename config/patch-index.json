@@ -373,5 +373,19 @@
     "files": {
       "xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp": "PresentRender's bridge paths return before the stock display-reset dispatch; send a due reset there too, so VideoPlayer and ActiveAE leave the display-lost state after a mode change while DV or HDR10 conversion is presenting. Kodi 22.0 RC1's Flush(saveBuffers) keeps the DV frame across OnLostDisplay, which made this reachable."
     }
+  },
+  "patches/kodi/kodi-9999-dv-single-modeset.patch": {
+    "component": "kodi",
+    "summary": "Make each DV transition a single HDMI mode change",
+    "files": {
+      "xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp": "A refresh switch for a stream that will use native output leaves its mode set pending for the bridge's first commit, which carries the new mode and the DV or HDR10 signal together; GUI flips are held meanwhile. A Standard-DV stop that a refresh restore will follow keeps the signal and the last frame until that restore, which then carries the signal restore and the new mode in one commit. Both fall back to separate commits at a deadline (3 s and 2.5 s).",
+      "xbmc/windowing/gbm/WinSystemGbmGLESContext.h": "State and deadlines for the deferred mode set and the held stop.",
+      "xbmc/windowing/gbm/WinSystemGbm.cpp": "SetFullScreen() completes its mode set through an overridable CompleteModeset().",
+      "xbmc/windowing/gbm/WinSystemGbm.h": "Declare CompleteModeset().",
+      "xbmc/cores/VideoPlayer/DVDCodecs/Video/DVPlaybackPolicy.h": "ExpectNativeOutput()/NativeOutputExpected(): a hint set around a refresh switch made for a native-output stream.",
+      "xbmc/cores/VideoPlayer/VideoPlayer.cpp": "Set the hint around the stream-open refresh switch.",
+      "xbmc/cores/VideoPlayer/VideoRenderers/RenderManager.cpp": "Set the hint around the render manager's refresh switch.",
+      "xbmc/cores/VideoPlayer/VideoRenderers/LinuxRendererGLES.cpp": "Renderer teardown ends DV through EndDVBridgeAtStop()."
+    }
   }
 }
