@@ -43,7 +43,8 @@
     "projects/Generic/patches/kodi/kodi-9997-dv-static-metadata-latch.patch": "96d97c03cfcdffe36e27e76f8aaa02e305fc8644874ee04721cb05b61fe5f493",
     "projects/Generic/patches/kodi/kodi-9998-activeae-sink-retry.patch": "12ce47660ee5748697870156c48994d512cad2734f3eb9d16cb08563b04d3b42",
     "packages/mediacenter/kodi/patches/9902-headers-only.patch": "01f9dbd516b5aaf59ee7420be913d0928a1eca436504da847d2f5bc4aba5848b",
-    "projects/Generic/patches/kodi/kodi-9999-dv-display-reset.patch": "48086ca5a5f826fdde03fd6c91328d28d5a8744baadb908cc61c53dffa90c696"
+    "projects/Generic/patches/kodi/kodi-9999-dv-display-reset.patch": "48086ca5a5f826fdde03fd6c91328d28d5a8744baadb908cc61c53dffa90c696",
+    "projects/Generic/patches/kodi/kodi-9999-vaapi-live-10bit.patch": "ca793f3946ed0ba453fdd849303c2cbd949ed4020fcb49e000f21fb8f836572b"
   },
   "schema": 2,
   "release": "0.3.0",
@@ -85,7 +86,8 @@
     "projects/Generic/patches/kodi/kodi-9997-dv-static-metadata-latch.patch": "patches/kodi/kodi-9997-dv-static-metadata-latch.patch",
     "projects/Generic/patches/kodi/kodi-9998-activeae-sink-retry.patch": "patches/kodi/kodi-9998-activeae-sink-retry.patch",
     "packages/mediacenter/kodi/patches/9902-headers-only.patch": "patches/libreelec/kodi/9902-headers-only.patch",
-    "projects/Generic/patches/kodi/kodi-9999-dv-display-reset.patch": "patches/kodi/kodi-9999-dv-display-reset.patch"
+    "projects/Generic/patches/kodi/kodi-9999-dv-display-reset.patch": "patches/kodi/kodi-9999-dv-display-reset.patch",
+    "projects/Generic/patches/kodi/kodi-9999-vaapi-live-10bit.patch": "patches/kodi/kodi-9999-vaapi-live-10bit.patch"
   },
   "evidence": "docs/VALIDATION.md",
   "executables": [

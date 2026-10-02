@@ -373,5 +373,12 @@
     "files": {
       "xbmc/windowing/gbm/WinSystemGbmGLESContext.cpp": "PresentRender's bridge paths return before the stock display-reset dispatch; send a due reset there too, so VideoPlayer and ActiveAE leave the display-lost state after a mode change while DV or HDR10 conversion is presenting. Kodi 22.0 RC1's Flush(saveBuffers) keeps the DV frame across OnLostDisplay, which made this reachable."
     }
+    },
+  "patches/kodi/kodi-9999-vaapi-live-10bit.patch": {
+    "component": "kodi",
+    "summary": "Use the decoder's real pixel format for VAAPI surfaces on live 10-bit streams",
+    "files": {
+      "xbmc/cores/VideoPlayer/DVDCodecs/Video/VAAPI.cpp": "CDecoder::Open() takes the bit depth and chroma from sw_pix_fmt, which FFmpeg sets from the bitstream before get_format. A live TS joined before its parameter sets reached VAAPI with the demuxer's default of 8 bits, so 10-bit HEVC got NV12 surfaces and every frame failed in vaEndPicture (black picture). Stock Kodi defect; not DV-specific."
+    }
   }
 }

@@ -46,6 +46,26 @@ followed by the refresh-rate restore, makes this likely.
 `InitSink()`, which is what the error-state retry expects. This is a stock Kodi
 defect; the change is not DV-specific.
 
+### Live 10-bit video over VAAPI
+
+`kodi-9999-vaapi-live-10bit.patch` fixes a black picture on some live 10-bit
+channels, such as 4K HEVC HLG over IPTV or DVB. The HDR signal comes up but no
+frame is ever shown. The same channel plays fine as a recording, a file or an
+HLS stream.
+
+When Kodi joins a live MPEG-TS stream partway through, the video can arrive
+before its codec headers. The demuxer then adds the stream without a pixel
+format and reports 8 bits, its default. VAAPI trusted that number, created
+8-bit (NV12) surfaces for 10-bit HEVC, and every frame failed in
+`vaEndPicture` with `VA_STATUS_ERROR_INVALID_PARAMETER`. By the time VAAPI is
+set up, FFmpeg has already read the real format from the bitstream
+(`sw_pix_fmt`), so `CDecoder::Open()` now takes the bit depth and chroma from
+there. DXVA and VDPAU already do this.
+
+This is a stock Kodi defect (xbmc/xbmc#23699), not DV-specific. Kodi's #28103
+handled a bit depth of 0, which inputstream add-ons produce, but not the 8 that
+the demuxer reports here.
+
 ### FEL presentation pairing
 
 `kodi-9993-fel-presentation-pairing.patch` fixes stalls and back-and-forth motion
